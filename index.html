@@ -1609,17 +1609,21 @@ function rSc(){
 }
 
 async function sendChat(){(async()=>{
-  const activeModel=(quiz[idx]&&quiz[idx].difficulty==='初級')?'flash':gemModel;
-  const input=document.getElementById('chatInput');
-  if(!input||!input.value.trim()||chatLoading||chatTurns>=chatMaxTurns)return;
-  const userMsg=input.value.trim();
-  chatHist.push({role:'user',content:userMsg});
-  chatTurns++;chatLoading=true;render();
-  const c=quiz[idx];
-  const userAns=c.options.find(o=>o.id===sel);
-  const correctAns=c.options.find(o=>o.id===c.bestAnswer);
-  const isLastTurn=chatTurns>=chatMaxTurns;
-  const sysPrompt=`あなたは事業戦略の専門家です。以下のケースについてユーザーと壁打ち（戦略議論）をしてください。
+  try{
+    const activeModel=(quiz[idx]&&quiz[idx].difficulty==='初級')?'flash':gemModel;
+    const input=document.getElementById('chatInput');
+    if(!input||!input.value.trim()||chatLoading||chatTurns>=chatMaxTurns)return;
+    const userMsg=input.value.trim();
+    input.value='';
+    chatHist.push({role:'user',content:userMsg});
+    chatTurns++;
+    chatLoading=true;
+    render();
+    const c=quiz[idx];
+    const userAns=c.options.find(o=>o.id===sel);
+    const correctAns=c.options.find(o=>o.id===c.bestAnswer);
+    const isLastTurn=chatTurns>=chatMaxTurns;
+    const sysPrompt=`あなたは事業戦略の専門家です。以下のケースについてユーザーと壁打ち（戦略議論）をしてください。
 【ケース】${c.situation}
 【問い】${c.question}
 【ユーザーの回答】${userAns?userAns.label:'未選択'}
@@ -1634,13 +1638,16 @@ async function sendChat(){(async()=>{
 - 反論や別の視点も積極的に提示
 - 実在企業の事例を交えて具体的に
 ${isLastTurn?'- 【重要】これが最後のターンです。新しい質問は投げかけず、これまでの議論を総括してください。ユーザーの戦略的思考の良かった点を具体的に挙げ、今後の学びのポイントをまとめて締めくくってください。':'- 回答の最後に、議論を深めるための問いかけを1つ入れてください。'}`;
-  const messages=[{role:'user',parts:[{text:sysPrompt}]},{role:'model',parts:[{text:'承知しました。このケースについて議論しましょう。'}]}];
-  chatHist.forEach(m=>{messages.push({role:m.role==='user'?'user':'model',parts:[{text:m.content}]});});
-  try{
+    const messages=[{role:'user',parts:[{text:sysPrompt}]},{role:'model',parts:[{text:'承知しました。このケースについて議論しましょう。'}]}];
+    chatHist.forEach(m=>{messages.push({role:m.role==='user'?'user':'model',parts:[{text:m.content}]});});
+    const controller=new AbortController();
+    const tid=setTimeout(()=>controller.abort(),30000);
     const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_INFO[activeModel||gemModel].api}:generateContent?key=${gemKey}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:messages,generationConfig:{maxOutputTokens:16000,temperature:0.7}})
+      body:JSON.stringify({contents:messages,generationConfig:{maxOutputTokens:16000,temperature:0.7}}),
+      signal:controller.signal
     });
+    clearTimeout(tid);
     const data=await res.json();
     if(data.candidates&&data.candidates[0]){
       const text=data.candidates[0].content.parts.map(p=>p.text||'').join('');
@@ -1652,12 +1659,13 @@ ${isLastTurn?'- 【重要】これが最後のターンです。新しい質問�
       chatHist.push({role:'model',content:'⚠️ APIエラー: '+(data.error?.message||'応答を取得できませんでした')});
     }
   }catch(e){
-    chatHist.push({role:'model',content:'⚠️ 通信エラー: '+e.message});
+    chatHist.push({role:'model',content:'⚠️ エラー: '+(e.name==='AbortError'?'タイムアウト（30秒）。再送信してください。':e.message)});
+  }finally{
+    chatLoading=false;
+    if(chatTurns>=chatMaxTurns){saveSparringSession();}
+    render();
+    setTimeout(()=>{const ci=document.getElementById('chatInput');if(ci)ci.focus();},100);
   }
-  chatLoading=false;
-  if(chatTurns>=chatMaxTurns){saveSparringSession();}
-  render();
-  setTimeout(()=>{const ci=document.getElementById('chatInput');if(ci)ci.focus();},100);
 })();}
 
 function bindAll(){
