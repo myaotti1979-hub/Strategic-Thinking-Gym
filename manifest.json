@@ -1,1 +1,16 @@
-{"name":"Strategic Thinking Gym","short_name":"STGym","description":"ケースで鍛える事業戦略フレームワーク","start_url":"./index.html","display":"standalone","background_color":"#0a0a0a","theme_color":"#0a0a0a","orientation":"portrait","icons":[{"src":"icon-192.svg","sizes":"192x192","type":"image/svg+xml"},{"src":"icon-512.svg","sizes":"512x512","type":"image/svg+xml"},{"src":"icon-192.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}],"categories":["education","business"]}
+{
+  "name": "Strategic Thinking Gym",
+  "short_name": "STGym",
+  "description": "ケースで鍛える事業戦略フレームワーク - 952問のケーススタディ練習アプリ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" },
+    { "src": "icon-192.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "categories": ["education", "business"]
+}

@@ -17,16 +17,16 @@
 /* Splash Screen */
 #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;transition:opacity 0.5s ease-out}
 #splash.hide{opacity:0;pointer-events:none}
-#splash .logo{font-size:48px;margin-bottom:16px;animation:pulse 1.5s ease-in-out infinite}
+#splash .logo{margin-bottom:20px;opacity:0;animation:fadeUp 0.8s ease-out 0.2s forwards}
 #splash .title{color:#d4a853;font-size:10px;font-weight:800;letter-spacing:5px;text-transform:uppercase;margin-bottom:4px}
-#splash .subtitle{color:#e8e4d9;font-size:24px;font-weight:900;letter-spacing:2px;margin-bottom:10px}
-#splash .tagline{color:#a09d93;font-size:13px}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+#splash .subtitle{color:#e8e4d9;font-size:22px;font-weight:900;letter-spacing:3px;margin-bottom:8px;opacity:0;animation:fadeUp 0.8s ease-out 0.5s forwards}
+#splash .tagline{color:#a09d93;font-size:12px;opacity:0;animation:fadeUp 0.8s ease-out 0.8s forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div id="splash">
-  <div class="logo">🧠</div>
+  <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
   <div class="tagline">ケースで鍛える事業戦略フレームワーク</div>
 </div>
@@ -1402,7 +1402,7 @@ try{monthlyCost=parseFloat(localStorage.getItem('monthly_cost_'+new Date().toISO
 const MODEL_INFO={
   flash:{name:'2.5 Flash',icon:'⚡',api:'gemini-2.5-flash',inCost:0.30,outCost:2.50,thinkMult:0,desc:'コスパ重視'},
   pro25:{name:'2.5 Pro',icon:'💎',api:'gemini-2.5-pro',inCost:1.25,outCost:10.00,thinkMult:2.5,desc:'バランス型'},
-  pro31:{name:'3.1 Pro',icon:'🧠',api:'gemini-3.1-pro-preview',inCost:2.00,outCost:12.00,thinkMult:3,desc:'最高品質'}
+  pro31:{name:'3.1 Pro',icon:'◆',api:'gemini-3.1-pro-preview',inCost:2.00,outCost:12.00,thinkMult:3,desc:'最高品質'}
 };
 function estTurnCost(m){const i=MODEL_INFO[m];const inT=1800,outT=1500,thT=outT*i.thinkMult;return((inT*i.inCost+(outT+thT)*i.outCost)/1000000*152).toFixed(1);}
 function estCostFromChars(inChars,outChars,m){const i=MODEL_INFO[m];const inT=Math.ceil(inChars/1.5),outT=Math.ceil(outChars/1.5),thT=outT*i.thinkMult;return(inT*i.inCost+(outT+thT)*i.outCost)/1000000*152;}
@@ -1439,7 +1439,7 @@ function rS(){
   const rate=answered>0?Math.round(correct/answered*100):0;
   return`<div class="ctn fade-in">
   <div style="text-align:center;padding-top:36px;margin-bottom:28px">
-    <div style="font-size:36px;margin-bottom:10px">🧠</div>
+    <div style="margin-bottom:12px"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
     <div style="color:#e8e4d9;font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:6px">Strategic Thinking Gym</div>
     <div style="color:#a09d93;font-size:12px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#6b6860;font-size:11px">全${CASES.length}問（個別${indv.length}＋総合${comp}）</div>

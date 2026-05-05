@@ -1,4 +1,4 @@
-const CACHE_NAME = 'strategy-practice-v1';
+const CACHE_NAME = 'stgym-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -25,7 +25,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  // Google Fonts: cache-first
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     e.respondWith(
       caches.match(e.request).then(r => r || fetch(e.request).then(res => {
@@ -36,12 +35,10 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-  // Gemini API: always network
   if (url.hostname === 'generativelanguage.googleapis.com') {
     e.respondWith(fetch(e.request));
     return;
   }
-  // Everything else: cache-first, fallback to network
   e.respondWith(
     caches.match(e.request).then(r => r || fetch(e.request).then(res => {
       if (res.ok) {
