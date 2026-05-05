@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#0a0a0a"/>
+  <text x="256" y="200" text-anchor="middle" font-family="serif" font-size="180" font-weight="bold" fill="#d4a853">戦</text>
+  <text x="256" y="380" text-anchor="middle" font-family="serif" font-size="120" font-weight="bold" fill="#d4a853">略</text>
+  <rect x="60" y="420" width="392" height="4" rx="2" fill="#d4a853" opacity="0.5"/>
+</svg>
