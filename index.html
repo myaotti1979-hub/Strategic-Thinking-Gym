@@ -1566,7 +1566,7 @@ function rChat(c,ok){
   let msgs=chatHist.map(m=>`<div style="display:flex;gap:10px;margin-bottom:12px;${m.role==='user'?'flex-direction:row-reverse':''}"><div style="width:28px;height:28px;border-radius:14px;background:${m.role==='user'?'#d4a853':'#6ec992'};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">${m.role==='user'?'👤':'🤖'}</div><div style="background:${m.role==='user'?'#1a1710':'#0f1714'};border:1px solid ${m.role==='user'?'#3a3520':'#1a3526'};border-radius:12px;padding:12px 14px;max-width:85%;font-size:13px;line-height:1.7;color:#c0bdb4">${m.content.replace(/\n/g,'<br>')}</div></div>`).join('');
   const canChat=chatTurns<chatMaxTurns&&!chatLoading;
   const inputArea=canChat?`<div style="display:flex;gap:8px;margin-top:8px"><textarea id="chatInput" placeholder="質問や反論を入力...&#10;(Ctrl+Enterで送信)" rows="3" style="flex:1;background:#141413;border:1px solid #2a2a28;border-radius:8px;padding:10px 12px;color:#e8e4d9;font-size:13px;font-family:inherit;outline:none;resize:none;line-height:1.6" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();sendChat()}"></textarea><button onclick="sendChat()" style="background:#d4a853;color:#0a0a0a;border:none;border-radius:8px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">送信</button></div>`:'';
-  const status=chatLoading?'<div style="color:#6b6860;font-size:12px;margin-top:8px">🤔 考え中...</div>':chatTurns>=chatMaxTurns?'<div style="color:#6b6860;font-size:12px;margin-top:12px;padding:10px;background:#141413;border-radius:8px;text-align:center">💡 壁打ち完了（'+MAX_CHAT+'ターン）</div>':'<div style="color:#6b6860;font-size:11px;margin-top:4px">残り'+(chatMaxTurns-chatTurns)+'ターン'+(chatTurns===chatMaxTurns-1?' （次が最後です）':'')+'</div>';
+  const status=chatLoading?'<div style="color:#6b6860;font-size:12px;margin-top:8px">🤔 考え中...</div>':chatTurns>=chatMaxTurns?'<div style="color:#6b6860;font-size:12px;margin-top:12px;padding:10px;background:#141413;border-radius:8px;text-align:center">💡 壁打ち完了（'+chatMaxTurns+'ターン）</div>':'<div style="color:#6b6860;font-size:11px;margin-top:4px">残り'+(chatMaxTurns-chatTurns)+'ターン'+(chatTurns===chatMaxTurns-1?' （次が最後です）':'')+'</div>';
   return`<div style="margin:20px 0;background:#0f0f0e;border:1px solid #2a2a28;border-radius:12px;padding:16px"><div style="color:#d4a853;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:12px">💬 壁打ちモード <span style="color:#6b6860;font-weight:400">${MODEL_INFO[c.difficulty==='初級'?'flash':gemModel].icon} ${MODEL_INFO[c.difficulty==='初級'?'flash':gemModel].name}${c.difficulty==='初級'?' (初級固定)':''}</span></div>${msgs}${inputArea}${status}</div>`;
 }
 
@@ -1662,7 +1662,7 @@ ${isLastTurn?'- 【重要】これが最後のターンです。新しい質問�
     chatHist.push({role:'model',content:'⚠️ エラー: '+(e.name==='AbortError'?'タイムアウト（30秒）。再送信してください。':e.message)});
   }finally{
     chatLoading=false;
-    if(chatTurns>=chatMaxTurns){saveSparringSession();}
+    try{if(chatTurns>=chatMaxTurns){saveSparringSession();}}catch(se){console.error('save error:',se);}
     render();
     setTimeout(()=>{const ci=document.getElementById('chatInput');if(ci)ci.focus();},100);
   }
