@@ -1473,34 +1473,35 @@ function rS(){
   return`<div class="ctn fade-in">
   <div style="text-align:center;padding-top:36px;margin-bottom:28px">
     <div style="margin-bottom:12px"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
-    <div style="color:#e8e4d9;font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:6px">Strategic Thinking Gym</div>
-    <div style="color:#a09d93;font-size:12px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
-    <div style="color:#6b6860;font-size:11px">全${CASES.length}問（個別${indv.length}＋総合${comp}）</div>
+    <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
+    <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
+    <div style="color:#ffffff;font-size:12px">全${CASES.length}問（個別${indv.length}＋総合${comp}）</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v27</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
     <div style="background:#141413;border:1px solid #2a2a28;border-radius:10px;padding:12px 8px">
       <div style="font-size:20px;font-weight:900;color:#d4a853">${answered}</div>
-      <div style="font-size:9px;color:#6b6860;margin-top:2px">回答済</div>
+      <div style="font-size:9px;color:#e0ddd4;margin-top:2px">回答済</div>
     </div>
     <div style="background:#141413;border:1px solid #2a2a28;border-radius:10px;padding:12px 8px">
       <div style="font-size:20px;font-weight:900;color:#6ec992">${rate}%</div>
-      <div style="font-size:9px;color:#6b6860;margin-top:2px">正答率</div>
+      <div style="font-size:9px;color:#e0ddd4;margin-top:2px">正答率</div>
     </div>
     <div style="background:#141413;border:1px solid #2a2a28;border-radius:10px;padding:12px 8px">
       <div style="font-size:20px;font-weight:900;color:#e8e4d9">${CASES.length-answered}</div>
-      <div style="font-size:9px;color:#6b6860;margin-top:2px">未回答</div>
+      <div style="font-size:9px;color:#e0ddd4;margin-top:2px">未回答</div>
     </div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-    <button onclick="mode='individual';screen='individual_setup';render()" class="btn bg" style="display:flex;align-items:center;gap:12px;justify-content:flex-start;padding:16px 20px;text-align:left">
+    <button onclick="mode='individual';screen='individual_setup';render()" class="btn" style="background:#5b8fb9;color:#fff" style="display:flex;align-items:center;gap:12px;justify-content:flex-start;padding:16px 20px;text-align:left">
       <span style="font-size:24px">📝</span>
-      <div><div style="font-size:14px;font-weight:800">個別問題</div><div style="font-size:11px;color:#a09d93;font-weight:400;margin-top:2px">FW・難易度を選んで出題</div></div>
+      <div><div style="font-size:14px;font-weight:800">個別問題</div><div style="font-size:11px;color:#c8dce8;font-weight:400;margin-top:2px">FW・難易度を選んで出題</div></div>
     </button>
-    <button onclick="mode='comp';screen='comp_setup';render()" class="btn bg" style="display:flex;align-items:center;gap:12px;justify-content:flex-start;padding:16px 20px;text-align:left">
+    <button onclick="mode='comp';screen='comp_setup';render()" class="btn" style="background:#5b8fb9;color:#fff" style="display:flex;align-items:center;gap:12px;justify-content:flex-start;padding:16px 20px;text-align:left">
       <span style="font-size:24px">📋</span>
-      <div><div style="font-size:14px;font-weight:800">総合ケース</div><div style="font-size:11px;color:#a09d93;font-weight:400;margin-top:2px">1企業×10問の一貫シナリオ</div></div>
+      <div><div style="font-size:14px;font-weight:800">総合ケース</div><div style="font-size:11px;color:#c8dce8;font-weight:400;margin-top:2px">1企業×10問の一貫シナリオ</div></div>
     </button>
     <div style="display:flex;gap:10px">
       <button onclick="showSparringHistory()" class="btn bo" style="flex:1;display:flex;align-items:center;gap:8px;justify-content:center;padding:14px">
