@@ -1942,6 +1942,7 @@ async function pullFromCloud(){
     const remoteKeys=Object.keys(data.h).length;
     // Merge: union of both (both are correct/wrong, no conflict)
     let changed=false;
+    if(_clearing)return;
     Object.entries(data.h).forEach(([k,v])=>{
       if(!answerHistory[k]){answerHistory[k]=v;changed=true;}
     });
@@ -1958,6 +1959,7 @@ async function pullFromCloud(){
 }
 
 function schedulePush(){
+  if(_clearing)return;
   if(syncTimer)clearTimeout(syncTimer);
   syncTimer=setTimeout(()=>pushToCloud(),2000); // debounce 2s
 }
