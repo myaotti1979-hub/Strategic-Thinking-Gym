@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ett-v2026.05.06o';
+const CACHE_NAME = 'ett-v2026.05.06p';
 const ASSETS = ['./', './index.html', './manifest.json', './manual.html', './icon-192.png', './icon-512.png', './apple-touch-icon-180.png', './apple-touch-icon-167.png', './apple-touch-icon-152.png', './apple-touch-icon-120.png'];
 
 self.addEventListener('install', e => {

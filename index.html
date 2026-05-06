@@ -229,7 +229,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
    Gemini 2.5 Flash + Azure Speech + PWA
    ═══════════════════════════════════════════════ */
 
-const VERSION = "v2026.05.06o";
+const VERSION = "v2026.05.06p";
 
 const $ = id => document.getElementById(id);
 const app = document.getElementById("app");
@@ -457,7 +457,8 @@ const S = {
   ftVoice: "en-US-JennyNeural",
   ftTurnCount: 0, ftSessionActive: false, ftQuickMode: false,
   ftWhoseTurn: 'ai',
-  ftSessionId: 0,  // incremented each session to invalidate stale callbacks  // 'ai' | 'you' — whose turn to speak
+  ftSessionId: 0,  // incremented each session to invalidate stale callbacks
+  ftEnding: false,  // prevent double execution of end session  // 'ai' | 'you' — whose turn to speak
   ftChallengeExprs: [], ftChallengeUsed: [],
   ftPronScores: [], // pronunciation scores per turn
   // Flash Translation
@@ -481,7 +482,14 @@ if (S.geminiKey) S.screen = "home";
 // ── Safe localStorage ──
 function safeLSSet(key, value) {
   try { localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value)); }
-  catch(e) { console.warn("Storage full for " + key); }
+  catch(e) {
+    console.warn("Storage full for " + key);
+    // Show notification only once per session
+    if (!S._storageWarned) {
+      S._storageWarned = true;
+      setTimeout(function() { alert("ブラウザの保存容量が上限に達しました。設定画面から「データクリア」を行ってください。"); }, 100);
+    }
+  }
 }
 
 // ── Streak System ──
@@ -669,21 +677,22 @@ function stopAudio() {
   if (window.speechSynthesis) speechSynthesis.cancel();
 }
 
+function speakBrowser(text) {
+  return new Promise(function(resolve) {
+    if (!window.speechSynthesis) { resolve(); return; }
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = S.ftLevel === 'A1' || S.ftLevel === 'A2' ? 0.8 : S.ftLevel === 'C1' ? 1.1 : 1.0;
+    u.onend = resolve;
+    u.onerror = function() { resolve(); };
+    speechSynthesis.speak(u);
+  });
+}
+
 async function speakText(text, voiceId = "en-US-JennyNeural") {
   stopAudio();
 
-  // Fallback to browser TTS if Azure key not set
-  if (!S.azureKey) {
-    return new Promise(function(resolve) {
-      if (!window.speechSynthesis) { resolve(); return; }
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'en-US';
-      u.rate = S.ftLevel === 'A1' || S.ftLevel === 'A2' ? 0.8 : S.ftLevel === 'C1' ? 1.1 : 1.0;
-      u.onend = resolve;
-      u.onerror = function() { resolve(); };
-      speechSynthesis.speak(u);
-    });
-  }
+  if (!S.azureKey) return speakBrowser(text);
 
   S.cost.ttsChars += text.length;
 
@@ -699,26 +708,30 @@ async function speakText(text, voiceId = "en-US-JennyNeural") {
     </voice>
   </speak>`;
 
-  const url = `https://${S.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`;
-  const res = await fetchT(url, {
-    method: "POST",
-    headers: {
-      "Ocp-Apim-Subscription-Key": S.azureKey,
-      "Content-Type": "application/ssml+xml",
-      "X-Microsoft-OutputFormat": "audio-16khz-128kbitrate-mono-mp3"
-    },
-    body: ssml
-  });
-  if (!res.ok) throw new Error(`Azure TTS ${res.status}`);
-
-  const audioBlob = await res.blob();
-  const blobUrl = URL.createObjectURL(audioBlob);
-  return new Promise((resolve, reject) => {
-    _curAudio = new Audio(blobUrl);
-    _curAudio.onended = () => { _curAudio = null; resolve(); };
-    _curAudio.onerror = reject;
-    _curAudio.play().catch(reject);
-  });
+  try {
+    const url = `https://${S.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`;
+    const res = await fetchT(url, {
+      method: "POST",
+      headers: {
+        "Ocp-Apim-Subscription-Key": S.azureKey,
+        "Content-Type": "application/ssml+xml",
+        "X-Microsoft-OutputFormat": "audio-16khz-128kbitrate-mono-mp3"
+      },
+      body: ssml
+    });
+    if (!res.ok) throw new Error(`Azure TTS ${res.status}`);
+    const audioBlob = await res.blob();
+    const blobUrl = URL.createObjectURL(audioBlob);
+    return new Promise((resolve, reject) => {
+      _curAudio = new Audio(blobUrl);
+      _curAudio.onended = () => { _curAudio = null; resolve(); };
+      _curAudio.onerror = reject;
+      _curAudio.play().catch(reject);
+    });
+  } catch(e) {
+    console.warn("Azure TTS failed, fallback to browser:", e.message);
+    return speakBrowser(text);
+  }
 }
 
 // ── Mic Stream Management ──
@@ -746,7 +759,11 @@ async function recordWav(maxMs, onAutoStop, costKey) {
   proc.onaudioprocess = e => {
     if (!stopped) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
   };
-  src.connect(proc); proc.connect(ctx.destination);
+  src.connect(proc);
+  var zeroGain = ctx.createGain();
+  zeroGain.gain.value = 0;
+  proc.connect(zeroGain);
+  zeroGain.connect(ctx.destination);
   const recorder = {
     stop: async () => {
       if (stopped) return new Blob([new ArrayBuffer(44)], {type:"audio/wav"});
@@ -775,13 +792,16 @@ async function recordWav(maxMs, onAutoStop, costKey) {
       return new Blob([wavBuf],{type:"audio/wav"});
     }
   };
-  // Auto-stop with callback so result is not lost
-  var _autoStopTimer = setTimeout(async () => {
-    if (!stopped) {
-      var blob = await recorder.stop();
-      if (onAutoStop) onAutoStop(blob);
-    }
-  }, maxMs);
+  // Auto-stop with callback so result is not lost (skip if maxMs=0)
+  var _autoStopTimer = null;
+  if (maxMs > 0) {
+    _autoStopTimer = setTimeout(async () => {
+      if (!stopped) {
+        var blob = await recorder.stop();
+        if (onAutoStop) onAutoStop(blob);
+      }
+    }, maxMs);
+  }
   return recorder;
 }
 
@@ -1690,6 +1710,8 @@ ${_openingStyles[Math.floor(Math.random() * _openingStyles.length)]}`;
   try {
     // Use Google Search grounding for news topics to get real current news
     const reply = await geminiChat(S.chatHistory, sysPrompt, false, isNews);
+    // Guard: if session changed while waiting, discard
+    if (_sid !== S.ftSessionId || !S.ftSessionActive) return;
     S.chatHistory.push({ role: "assistant", content: reply });
     S.chatMessages.push({ type: "ai", text: reply });
     hideTyping();
@@ -1750,7 +1772,7 @@ function renderFreeTalkChat() {
   `;
 
   $("ftChatBack").onclick = async () => {
-    srStop(); stopAudio(); releaseMicStream();
+    srCancel(); stopAudio(); releaseMicStream();
     if (S.ftSessionActive && S.chatHistory.length > 2) {
       if (confirm("会話を終了しますか？フィードバックを取得できます。")) {
         await endFreeTalkSession();
@@ -1900,6 +1922,24 @@ function _deliverResult() {
   var text = _srBuf.trim();
   _srBuf = '';
   if (_srCallback) { var cb = _srCallback; _srCallback = null; cb(text); }
+}
+
+// Cancel recording without delivering results (for navigation/ending)
+function srCancel() {
+  _srActive = false;
+  clearTimeout(_srRestartTimer);
+  _srBuf = '';
+  _srCallback = null;
+  _srUseAzure = false;
+  if (_sr) {
+    _sr.onend = null; _sr.onresult = null; _sr.onerror = null;
+    try { _sr.abort(); } catch(e) {}
+    _sr = null;
+  }
+  if (_srRecorder) {
+    try { _srRecorder.stop(); } catch(e) {}
+    _srRecorder = null;
+  }
 }
 
 function _srDoStart() {
@@ -2108,6 +2148,7 @@ async function handleUserMessage(text) {
   S.chatMessages.push({ type: "user", text });
   S.chatHistory.push({ role: "user", content: text });
   S.ftTurnCount++;
+  var sid = S.ftSessionId;
 
   // Check if user used challenge expressions
   S.ftChallengeExprs.forEach((expr, i) => {
@@ -2138,6 +2179,7 @@ ${isRolePlay ? "Stay in character for this role-play scenario." : ""}`;
 
   try {
     const reply = await geminiChat(S.chatHistory, sysPrompt);
+    if (sid !== S.ftSessionId || !S.ftSessionActive) return;
     S.chatHistory.push({ role: "assistant", content: reply });
     S.chatMessages.push({ type: "ai", text: reply });
     hideTyping();
@@ -2154,9 +2196,11 @@ ${isRolePlay ? "Stay in character for this role-play scenario." : ""}`;
 }
 
 async function endFreeTalkSession() {
+  if (S.ftEnding) return;
+  S.ftEnding = true;
   S.ftSessionActive = false;
   S.isRecording = false;
-  srStop(); stopAudio(); releaseMicStream();
+  srCancel(); stopAudio(); releaseMicStream();
   const elapsed = Math.max(1, Math.round((Date.now() - (S.ftStartTime || Date.now())) / 60000));
   const topic = FT_ALL_TOPICS.find(t => t.id === S.ftTopic);
 
@@ -2214,9 +2258,11 @@ COMPACT JSON. Keep strings SHORT. Max 3 corrections.
     extractVocabulary(S.chatHistory).catch(()=>{});
 
     S.screen = "review";
+    S.ftEnding = false;
     render();
   } catch(e) {
     hideTyping();
+    S.ftEnding = false;
     S.chatMessages.push({ type: "system", text: `フィードバック取得失敗: ${e.message}` });
     renderFreeTalkChat();
   }
@@ -2712,7 +2758,7 @@ async function renderShadowPractice() {
     $("shRecordBtn").textContent = "⏹ 録音中...";
     $("shRecordBtn").className = "btn btn-danger mt-8";
     try {
-      const rec = await recordWav(15000, null, 'pronSeconds');
+      const rec = await recordWav(0, null, 'pronSeconds');
       // Wait a moment then stop (or user presses again)
       $("shRecordBtn").onclick = async () => {
         $("shRecordBtn").disabled = true;
