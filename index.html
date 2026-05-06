@@ -1895,7 +1895,16 @@ function rSparringView(){
 
 // === PWA: Service Worker Registration ===
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW:',e));
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{
+    reg.update();
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing;
+      nw.addEventListener('statechange',()=>{
+        if(nw.state==='activated'){window.location.reload();}
+      });
+    });
+  }).catch(e=>console.log('SW:',e));
+  navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
 }
 
 // === Cloud Sync (Firebase Realtime Database) ===
