@@ -25,6 +25,14 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+
+  // API calls: always network
+  if (url.hostname === 'generativelanguage.googleapis.com') {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  // Google Fonts: cache-first
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     e.respondWith(
       caches.match(e.request).then(r => r || fetch(e.request).then(res => {
@@ -35,10 +43,22 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-  if (url.hostname === 'generativelanguage.googleapis.com') {
-    e.respondWith(fetch(e.request));
+
+  // index.html: NETWORK-FIRST (always get latest, fallback to cache)
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('index.html') || url.pathname.endsWith('/')) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
     return;
   }
+
+  // Other assets: cache-first
   e.respondWith(
     caches.match(e.request).then(r => r || fetch(e.request).then(res => {
       if (res.ok) {
