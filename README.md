@@ -1,84 +1,68 @@
-# Strategic Thinking Gym
+# English Talk Trainer
 
-**ケースで鍛える事業戦略フレームワーク**
+AI-Powered English Conversation Practice PWA
 
-マーケティングフレームワーク10種×3難易度のケーススタディ練習アプリ（PWA対応）
+Gemini 2.5 Flash/Pro × Azure Speech × PWA
 
-## 📊 コンテンツ（952問）
+## Features
 
-| 難易度 | 個別問題 | 総合シナリオ | 合計 |
-|---|---|---|---|
-| 🟢 初級 | 302問 | 15本×10ステップ=150問 | 452問 |
-| 🟡 中級 | 200問 | 10本×10ステップ=100問 | 300問 |
-| 🔴 上級 | 100問 | 10本×10ステップ=100問 | 200問 |
-| **合計** | **602問** | **350問** | **952問** |
+### 4 Training Modes
+- **Free Talk** — AI英会話（17カテゴリ・207トピック・54ロールプレイ）
+- **Flash Translation** — 瞬間英作文（10問1セット×4カテゴリ×5レベル）
+- **Shadowing** — AI発話を繰り返し＋Azure発音評価
+- **News Discussion** — 実際のニュースを読んで議論（22ジャンル・Google Search Grounding）
 
-## 🎯 フレームワーク（10種）
+### CEFR 5段階レベル
+A1（入門）〜 C1（上級）。語彙・文法・話速・フィードバック基準を体系的に定義。
 
-**マーケティングフレームワーク**: PESTLE分析 → 5フォース分析 → SWOT分析 → クロスSWOT分析 → アンゾフの成長マトリクス → STP分析 → 4P/4C分析
+### 学習支援
+- **チャレンジ表現** — 22スキルカテゴリ×ローテーション。トピック連動。使用判定＋AI評価
+- **復習システム** — 間隔反復（1→3→7→14→30日）
+- **フレーズ集** — ユーザー自身が使ったフレーズを自動抽出・記録
+- **会話ログ** — 最大50セッション保存
+- **ストリーク＋カレンダー** — 連続学習日数表示
+- **自動CEFRレベル判定** — 直近10セッション平均から推奨レベル
 
-**グロースモデル**: グロースモデル選択 → KPI設計 → 実行戦略パターン
+### 音声
+- **TTS**: Azure Neural TTS（10声×4アクセント）+ ブラウザ音声フォールバック
+- **STT**: Azure STT（デフォルト）/ Web Speech API / 自動切替
+- **発音評価**: Azure Pronunciation Assessment（Shadowing）
 
-## 🚀 使い方
+### コスト最適化
+- Azure STT + Flash構成: 1セッション約7円
+- Web Speech + Flash構成: 1セッション約3.5円
+- 累計コストをホーム画面に表示
 
-### GitHub Pages でホスト
+## Setup
 
-1. このリポジトリをフォークまたはクローン
-2. Settings → Pages → Source: `main` branch, `/ (root)` を選択
-3. `https://<username>.github.io/<repo-name>/` でアクセス
+### Required
+- **Gemini API Key** — [Google AI Studio](https://aistudio.google.com/apikey)
 
-### PWA としてインストール
+### Recommended
+- **Azure Speech Key** — [Azure Portal](https://portal.azure.com/) → Speech Services
 
-- **iOS**: Safari でアクセス → 共有 → ホーム画面に追加
-- **Android**: Chrome でアクセス → メニュー → アプリをインストール
-- **PC**: Chrome/Edge でアクセス → アドレスバーのインストールアイコン
-
-### デバイス間自動同期（Firebase）
-
-**初回セットアップ（2分）：**
-
-1. [Firebase Console](https://console.firebase.google.com/) にアクセス
-2. 「プロジェクトを追加」→ 適当な名前 → 作成
-3. 左メニュー「構築」→「Realtime Database」→「データベースを作成」
-4. 「テストモードで開始」を選択 → 有効にする
-5. 表示されるURL（`https://xxx-default-rtdb.firebaseio.com`）をコピー
-
-**アプリでの設定：**
-
-1. HOMEの「☁️ クラウド同期を設定」をタップ
-2. Firebase URLと同期ID（好きな文字列）を入力
-3. 全端末で同じURL＋同期IDを設定すれば自動同期
-
-回答するたびに自動でクラウドに保存され、別端末を開くと自動で同期されます。
-
-**手動同期（Firebase なしでも利用可能）：** 📤 / 📥 ボタンでエクスポート・インポート
-
-## 💬 壁打ちモード（Gemini API連携）
-
-問題の解説後に「壁打ちする」ボタンでAIと戦略議論ができます。セッションは自動保存され、HOME画面の「壁打ち履歴」から過去の議論を閲覧・比較できます。
-
-- **⚡ Gemini 2.5 Flash**: 低コスト（初級はFlash限定）
-- **💎 Gemini 2.5 Pro**: 高精度
-- **◆ Gemini 3.1 Pro Preview**: 最新モデル
-
-APIキーは [Google AI Studio](https://aistudio.google.com/apikey) で無料取得できます。
-
-## 📁 ファイル構成
+### Deployment
+GitHub Pages, Netlify, Cloudflare Pages 等のHTTPS環境に配置。
 
 ```
-├── index.html      # メインアプリ（952問・全機能内蔵）
-├── manifest.json   # PWAマニフェスト
-├── sw.js           # Service Worker（オフライン対応・v2）
-├── icon-192.svg    # アプリアイコン
-├── icon-512.svg    # アプリアイコン（大）
-└── README.md
+English-Talk-Trainer/
+├── index.html          # メインアプリ（単一ファイルSPA）
+├── sw.js               # Service Worker
+├── manifest.json       # PWA マニフェスト
+├── manual.html         # マニュアル
+├── icon-192.png        # PWA アイコン
+├── icon-512.png        # PWA アイコン（大）
+└── apple-touch-icon-*.png  # iOS アイコン
 ```
 
-## ⚡ オフライン対応
+## Tech Stack
+- **AI**: Gemini 2.5 Flash / Pro（Google AI Studio API）
+- **Speech**: Azure Cognitive Services Speech SDK
+- **Frontend**: Vanilla HTML/CSS/JS（フレームワークなし）
+- **PWA**: Service Worker + Web App Manifest
 
-Service Workerにより一度アクセスすればオフラインでも利用可能（壁打ちモードのみオンライン必要）。
+## Version
+v2026.05.06o
 
-## 📝 更新履歴
-
-- **v2** - 952問完成、HOME画面リニューアル、スプラッシュ画面追加、タイトル変更（Strategic Thinking Gym）
-- **v1** - 初期リリース
+## License
+Private / Personal Use
