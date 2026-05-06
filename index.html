@@ -1425,7 +1425,7 @@ window.aDiff='all';
 let answerHistory={};
 try{answerHistory=JSON.parse(localStorage.getItem('answer_history')||'{}');}catch(e){}
 function saveAnswer(id,correct){answerHistory[id]=correct?'correct':'wrong';try{localStorage.setItem('answer_history',JSON.stringify(answerHistory));}catch(e){}}
-function clearHistory(){answerHistory={};try{localStorage.removeItem('answer_history');}catch(e){}if(typeof syncUrl!=='undefined'&&syncUrl&&typeof syncId!=='undefined'&&syncId){try{const url=syncUrl.replace(/\/$/,'')+'/'+encodeURIComponent(syncId)+'.json';fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h:{},t:Date.now()})});}catch(e){}}render();}
+let _clearing=false;async function clearHistory(){_clearing=true;answerHistory={};try{localStorage.removeItem('answer_history');}catch(e){}if(typeof syncUrl!=='undefined'&&syncUrl&&typeof syncId!=='undefined'&&syncId){try{const url=syncUrl.replace(/\/$/,'')+'/'+encodeURIComponent(syncId)+'.json';await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h:{},t:Date.now()})});}catch(e){}}render();setTimeout(()=>{_clearing=false;},3000);}
 let gemKey='';
 let gemModel='flash';
 let chatMaxTurns=3;
@@ -1929,7 +1929,7 @@ async function pushToCloud(){
 }
 
 async function pullFromCloud(){
-  if(!isSyncEnabled())return;
+  if(!isSyncEnabled()||_clearing)return;
   syncStatus='syncing';updateSyncBadge();
   try{
     const url=syncUrl.replace(/\/$/,'')+'/'+encodeURIComponent(syncId)+'.json';
