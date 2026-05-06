@@ -1,68 +1,46 @@
-# English Talk Trainer
+# 更新履歴 — Strategic Thinking Gym
 
-AI-Powered English Conversation Practice PWA
+## v6（2025-05-06）🎯 1,000問達成
+- 全1,000問（初級452＋中級325＋上級223）
+- 全10フレームワーク×100問ずつの完全バランス達成
+- 上級総合シナリオ10社を追加
+- ボーナス個別問題48問を追加（中級22問＋上級26問）
+- 業種：ペットフード、地方バス、ウェディング、学習塾、製薬、地方新聞、カーディーラー、クラフトビール、人材派遣、温泉旅館、総合商社、損保、牛丼チェーン、フィットネス、会計SaaS、化粧品OEM、物流倉庫、法律事務所、建設テック、介護テック 他
 
-Gemini 2.5 Flash/Pro × Azure Speech × PWA
+## v5（2025-05-06）🎯 弱点パーソナライズ壁打ち
+- レビューカードに「思考パターン」フィールド追加（FW非依存の上位概念）
+- `getTopWeaknessPattern()` で全レビューカードの思考パターンを集計
+- 壁打ちのシステムプロンプトに弱点を自動注入
+- 直接指摘ではなく問いかけで気づかせるコーチング設計
 
-## Features
+## v4（2025-05-06）📋 戦略レビューカード
+- 壁打ち終了時にバックグラウンドで2回目のAPI呼出し
+- AIが4項目をJSON生成：summary / strength / improvement / weaknessPattern
+- 壁打ち履歴一覧にカードをサムネ表示
+- 壁打ち詳細ページにカードを大きく表示
+- saveSparringSession を try/catch でラップ
 
-### 4 Training Modes
-- **Free Talk** — AI英会話（17カテゴリ・207トピック・54ロールプレイ）
-- **Flash Translation** — 瞬間英作文（10問1セット×4カテゴリ×5レベル）
-- **Shadowing** — AI発話を繰り返し＋Azure発音評価
-- **News Discussion** — 実際のニュースを読んで議論（22ジャンル・Google Search Grounding）
+## v3（2025-05-06）🐛 壁打ちフリーズ修正
+- `MAX_CHAT` 未定義変数を `chatMaxTurns` に修正（最終ターンフリーズの根本原因）
+- sendChat の async IIFE + try/catch/finally で確実に chatLoading をリセット
+- AbortController で30秒タイムアウト実装
+- APIエラー時のフォールバックメッセージ表示
 
-### CEFR 5段階レベル
-A1（入門）〜 C1（上級）。語彙・文法・話速・フィードバック基準を体系的に定義。
+## v2（2025-05-06）🎨 HOME画面リニューアル + ブランディング
+- タイトル変更：Strategic Thinking Gym（英語メイン）+ 副題（日本語）
+- HOME画面を3画面構成に分離（ハブ / 個別設定 / 総合設定）
+- スプラッシュスクリーン（幾何学ロゴ + フェードアップアニメーション）
+- 🧠（脳みそ絵文字）を全箇所から削除→幾何学SVGロゴに統一
+- アプリアイコンを幾何学ヘキサゴン×プリズムデザインに
+- manifest.json: name="Strategic Thinking Gym", short_name="STGym"
+- 壁打ち履歴保存機能（saveSparringSession / showSparringHistory）
+- 壁打ち履歴の閲覧・削除画面
 
-### 学習支援
-- **チャレンジ表現** — 22スキルカテゴリ×ローテーション。トピック連動。使用判定＋AI評価
-- **復習システム** — 間隔反復（1→3→7→14→30日）
-- **フレーズ集** — ユーザー自身が使ったフレーズを自動抽出・記録
-- **会話ログ** — 最大50セッション保存
-- **ストリーク＋カレンダー** — 連続学習日数表示
-- **自動CEFRレベル判定** — 直近10セッション平均から推奨レベル
-
-### 音声
-- **TTS**: Azure Neural TTS（10声×4アクセント）+ ブラウザ音声フォールバック
-- **STT**: Azure STT（デフォルト）/ Web Speech API / 自動切替
-- **発音評価**: Azure Pronunciation Assessment（Shadowing）
-
-### コスト最適化
-- Azure STT + Flash構成: 1セッション約7円
-- Web Speech + Flash構成: 1セッション約3.5円
-- 累計コストをホーム画面に表示
-
-## Setup
-
-### Required
-- **Gemini API Key** — [Google AI Studio](https://aistudio.google.com/apikey)
-
-### Recommended
-- **Azure Speech Key** — [Azure Portal](https://portal.azure.com/) → Speech Services
-
-### Deployment
-GitHub Pages, Netlify, Cloudflare Pages 等のHTTPS環境に配置。
-
-```
-English-Talk-Trainer/
-├── index.html          # メインアプリ（単一ファイルSPA）
-├── sw.js               # Service Worker
-├── manifest.json       # PWA マニフェスト
-├── manual.html         # マニュアル
-├── icon-192.png        # PWA アイコン
-├── icon-512.png        # PWA アイコン（大）
-└── apple-touch-icon-*.png  # iOS アイコン
-```
-
-## Tech Stack
-- **AI**: Gemini 2.5 Flash / Pro（Google AI Studio API）
-- **Speech**: Azure Cognitive Services Speech SDK
-- **Frontend**: Vanilla HTML/CSS/JS（フレームワークなし）
-- **PWA**: Service Worker + Web App Manifest
-
-## Version
-v2026.05.06o
-
-## License
-Private / Personal Use
+## v1（2025-05-05）🚀 初期リリース
+- 初級452問（個別302＋総合15社×10=150）
+- 中級200問（個別のみ）
+- 上級100問（個別のみ）
+- 壁打ちモード（Gemini API連携）
+- PWA化（Service Worker + manifest.json）
+- Firebase Realtime Database 自動同期
+- 手動エクスポート/インポート

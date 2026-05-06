@@ -1,20 +1,16 @@
 {
-  "name": "English Talk Trainer",
-  "short_name": "ETT",
-  "start_url": "./",
+  "name": "事業戦略ケース Practice",
+  "short_name": "戦略Practice",
+  "description": "マーケティングフレームワーク10種×3難易度のケーススタディ練習アプリ",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f0f4f8",
-  "theme_color": "#f0f4f8",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    { "src": "icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" },
+    { "src": "icon-192.svg", "sizes": "any",     "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "categories": ["education", "business"]
 }
