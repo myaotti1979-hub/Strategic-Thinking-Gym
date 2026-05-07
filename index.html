@@ -28,7 +28,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v28</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v29</div>
 </div>
 <div id="app"></div>
 <script>
@@ -1476,7 +1476,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問（個別${indv.length}＋総合${comp}）</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v28</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v29</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -1576,9 +1576,9 @@ function rQ(){
   <div style="margin-bottom:12px">${rBackBtn('やめる')}</div>
   <div class="hdr"><div><div class="hl">Strategic Thinking Gym</div><div class="ht">ケースで鍛える事業戦略フレームワーク</div></div><div><div style="color:#6b6860;font-size:11px;font-weight:600;margin-bottom:6px;text-align:right">Q${idx+1} / ${total}</div><div class="pg">${rD()}</div></div></div>
   <div class="cc"><div class="tgs"><span class="tg ti">${c.industry.replace(/（総合[①-⑮]）/,'')}</span><span class="tg td" style="background:${c.difficulty==='上級'?'#3a1515':c.difficulty==='中級'?'#3a3515':''}; color:${c.difficulty==='上級'?'#e07a73':c.difficulty==='中級'?'#d4c853':''}">${c.difficulty}</span><span class="tg tf">${c.framework}</span>${isComp?'<span class="tg tc">総合</span>':''}</div>
-  <p class="sit">${c.situation}</p><div class="qa"><p class="qt">${c.question}</p><div class="os">${c.options.map(o=>{let cl='ob';if(isR){cl+=' rv';if(o.id===c.bestAnswer)cl+=' co';else if(o.id===sel)cl+=' wr';else cl+=' fd';}else if(o.id===sel)cl+=' sl';const l=isR&&o.id===c.bestAnswer?'✓':o.id.toUpperCase();return`<button class="${cl}" data-id="${o.id}"><span class="ol">${l}</span><div><div class="oti">${o.label}</div>${isR?'<div class="ode">→ '+o.description+'</div>':''}</div></button>`;}).join('')}</div></div></div>
+  <p class="sit">${c.situation}</p><div class="qa"><p class="qt">${c.question}</p><div class="os">${c.options.map(o=>{let cl='ob';if(isR){cl+=' rv';if(o.id===c.bestAnswer)cl+=' co';else if(o.id===sel)cl+=' wr';else cl+=' fd';}else if(o.id===sel)cl+=' sl';const l=isR&&o.id===c.bestAnswer?'✓':o.id.toUpperCase();return`<button class="${cl}" data-id="${o.id}" onclick="if(!rev){sel='${o.id}';render();}"><span class="ol">${l}</span><div><div class="oti">${o.label}</div>${isR?'<div class="ode">→ '+o.description+'</div>':''}</div></button>`;}).join('')}</div></div></div>
   ${isR?`<div class="ex fade-in"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="font-size:22px">${ok?'🎯':'📝'}</span><span style="font-size:18px;font-weight:800;color:${ok?'#6ec992':'#e0a853'}">${ok?'正解！':'不正解'}</span></div><div style="margin-bottom:20px"><div class="sl2">解説</div><p class="st2">${c.options.map(o=>'<span style="color:'+(o.id===c.bestAnswer?'#6ec992':'#6b6860')+';font-size:11px">'+(o.id===c.bestAnswer?'✓':' ')+o.id.toUpperCase()+': '+o.label.substring(0,25)+(o.label.length>25?'…':'')+'</span>').join('<br>')}<div style="margin-top:10px">${c.explanation}</div></p></div><div class="fb"><div class="sl2">フレームワーク</div><p class="st2">${c.keyFramework}</p></div><div class="eb"><div class="sl2">実例</div><p class="st2">${c.realExample}</p></div></div>${chatUI}<button class="btn bl" id="nxt">${idx+1>=total?'結果を見る':'次の問題へ →'}</button>`
-  :`<button class="btn ${sel?'bg':'bo'}" id="sub">回答を確認する</button>`}</div>`;
+  :`<button class="btn ${sel?'bg':'bo'}" id="sub" onclick="if(sel){var isOk=sel===quiz[idx].bestAnswer;results[idx]=isOk?'correct':'wrong';saveAnswer(quiz[idx].id,isOk);rev=true;chatHist=[];chatTurns=0;render();}">回答を確認する</button>`}</div>`;
 }
 function rChat(c,ok){
   if(chatHist.length===0){
