@@ -28,7 +28,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v34</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v35</div>
 </div>
 <div id="app"></div>
 <script src="cases.js"></script>
@@ -147,7 +147,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v34</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v35</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -187,6 +187,13 @@ function rS(){
   <div style="padding-top:14px;border-top:1px solid #2a2a28">
     <div style="color:#a09d93;font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:8px">フレームワーク体系</div>
     <div style="color:#7a776e;font-size:11px;line-height:2"><span style="color:#d4a853">■ マーケ:</span> PESTLE→5F→SWOT→CrossSWOT→アンゾフ→STP→4P/4C<br><span style="color:#6ec992">■ グロース:</span> グロースモデル→KPI設計→実行パターン</div>
+  </div>
+  <div style="margin-top:12px">
+    <button onclick="screen='dashboard';render()" class="btn" style="width:100%;background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:10px;justify-content:center;padding:14px 20px;margin-bottom:8px"><span style="font-size:18px">📊</span><div>ダッシュボード</div></button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button onclick="screen='data_manage';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:8px;justify-content:center;padding:12px 16px;font-size:13px"><span>📦</span><div>データ管理</div></button>
+      <button onclick="screen='create_q';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:8px;justify-content:center;padding:12px 16px;font-size:13px"><span>✏️</span><div>問題作成</div></button>
+    </div>
   </div>
   ${Object.keys(answerHistory).length>0?'<div style="text-align:center;margin-top:12px"><button onclick="if(confirm(\'回答履歴をリセットしますか？\'))clearHistory()" style="background:none;border:none;color:#6b6860;font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline">履歴リセット</button></div>':''}
   </div>`;
@@ -535,7 +542,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v34').then(cache=>{
+      caches.open('stgym-v35').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -799,7 +806,7 @@ function addGeneratedQuestion(){
   // Update cache
   try{
     const blob=new Blob([JSON.stringify(CASES)],{type:'application/json'});
-    caches.open('stgym-v34').then(cache=>{
+    caches.open('stgym-v35').then(cache=>{
       cache.put(new Request('./cases.json'),new Response(blob));
     });
   }catch(e){}
