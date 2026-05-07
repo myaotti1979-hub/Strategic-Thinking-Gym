@@ -28,7 +28,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v33</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v34</div>
 </div>
 <div id="app"></div>
 <script>
@@ -126,7 +126,8 @@ let chatHist=[],chatLoading=false,chatTurns=0;
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 function pool(){
   if(mode==='comp'&&compTarget) return CASES.filter(c=>COMP_IDS[compTarget]?.includes(c.id));
-  let p=CASES.filter(c=>!c.industry.includes('総合'));
+  let src=questionSource==='gemini'?GEMINI_CASES:CASES;
+  let p=src.filter(c=>!c.industry?.includes('総合'));
   if(aFw!=='all') p=p.filter(c=>c.framework===aFw);
   if(window.aDiff&&window.aDiff!=='all') p=p.filter(c=>c.difficulty===window.aDiff);
   if(onlyUnanswered) p=p.filter(c=>!answerHistory[c.id]);
@@ -154,8 +155,8 @@ function rS(){
     <div style="margin-bottom:12px"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
-    <div style="color:#ffffff;font-size:12px">全${CASES.length}問（個別${indv.length}＋総合${comp}）</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v33</div>
+    <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v34</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -543,7 +544,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v33').then(cache=>{
+      caches.open('stgym-v34').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -807,7 +808,7 @@ function addGeneratedQuestion(){
   // Update cache
   try{
     const blob=new Blob([JSON.stringify(CASES)],{type:'application/json'});
-    caches.open('stgym-v33').then(cache=>{
+    caches.open('stgym-v34').then(cache=>{
       cache.put(new Request('./cases.json'),new Response(blob));
     });
   }catch(e){}
@@ -890,7 +891,7 @@ function bindAll(){
   if(qn&&qv)qn.oninput=()=>{qv.textContent=qn.value;};
   document.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{window.aDiff=b.dataset.diff;render();});
   const tu=document.getElementById('toggleUnanswered');if(tu)tu.onclick=()=>{onlyUnanswered=!onlyUnanswered;render();};
-  const st=document.getElementById('startBtn');if(st)st.onclick=()=>{const p=pool();if((mode==='individual'&&p.length>=5)||(mode==='comp'&&compTarget))start();};
+  const st=document.getElementById('startBtn');if(st)st.onclick=()=>{const p=pool();if((mode==='individual'&&p.length>=1)||(mode==='comp'&&compTarget))start();};
   if(screen==='quiz'&&!rev){document.querySelectorAll('.ob').forEach(b=>b.onclick=()=>{sel=b.dataset.id;render();});const s=document.getElementById('sub');if(s)s.onclick=()=>{if(!sel)return;const isOk=sel===quiz[idx].bestAnswer;results[idx]=isOk?'correct':'wrong';saveAnswer(quiz[idx].id,isOk);rev=true;chatHist=[];chatTurns=0;render();};}
   const s3t=document.getElementById('sel3t');if(s3t)s3t.onclick=()=>{chatMaxTurns=3;render();};
   const s5t=document.getElementById('sel5t');if(s5t)s5t.onclick=()=>{chatMaxTurns=5;render();};
