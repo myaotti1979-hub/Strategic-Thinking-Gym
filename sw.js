@@ -1,7 +1,8 @@
-const CACHE_NAME = 'stgym-v30';
+const CACHE_NAME = 'stgym-v31';
 const ASSETS = [
   './',
   './index.html',
+  './cases.json',
   './manifest.json',
   './icon-192.svg',
   './icon-512.svg'
@@ -19,7 +20,6 @@ self.addEventListener('activate', e => {
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     ).then(() => {
-      // Force all open tabs/PWA to reload with new cache
       return self.clients.matchAll({type: 'window'}).then(clients => {
         clients.forEach(client => client.navigate(client.url));
       });
@@ -32,7 +32,8 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
   // API calls: always network
-  if (url.hostname === 'generativelanguage.googleapis.com') {
+  if (url.hostname === 'generativelanguage.googleapis.com' ||
+      url.hostname.includes('firebaseio.com')) {
     e.respondWith(fetch(e.request));
     return;
   }
@@ -49,8 +50,11 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // index.html / navigation: NETWORK-FIRST
-  if (e.request.mode === 'navigate' || url.pathname.endsWith('index.html') || url.pathname.endsWith('/')) {
+  // index.html + cases.json: NETWORK-FIRST (always get latest, fallback to cache)
+  if (e.request.mode === 'navigate' || 
+      url.pathname.endsWith('index.html') || 
+      url.pathname.endsWith('cases.json') ||
+      url.pathname.endsWith('/')) {
     e.respondWith(
       fetch(e.request).then(res => {
         if (res.ok) {
