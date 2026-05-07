@@ -1,43 +1,76 @@
-const CACHE_NAME = 'toeic-trainer-v2026.05.07a';
-const ASSETS = ['./', './index.html'];
+const CACHE_NAME = 'stgym-v29';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.svg',
+  './icon-512.svg'
+];
 
-// Install: cache core assets
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
+  self.skipWaiting();
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    ).then(() => {
+      // Force all open tabs/PWA to reload with new cache
+      return self.clients.matchAll({type: 'window'}).then(clients => {
+        clients.forEach(client => client.navigate(client.url));
+      });
+    })
   );
+  self.clients.claim();
 });
 
-// Fetch: cache-first for app, network-only for API
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // API calls (Gemini, etc.) — always network
-  if (url.hostname !== location.hostname) return;
+  // API calls: always network
+  if (url.hostname === 'generativelanguage.googleapis.com') {
+    e.respondWith(fetch(e.request));
+    return;
+  }
 
-  // App files — cache-first, update in background
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      const fetchPromise = fetch(e.request).then(response => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+  // Google Fonts: cache-first
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    e.respondWith(
+      caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+        return res;
+      }))
+    );
+    return;
+  }
+
+  // index.html / navigation: NETWORK-FIRST
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('index.html') || url.pathname.endsWith('/')) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
         }
-        return response;
-      }).catch(() => cached);
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
 
-      return cached || fetchPromise;
-    })
+  // Other assets: cache-first
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+      if (res.ok) {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+      }
+      return res;
+    }))
   );
 });
