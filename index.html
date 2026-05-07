@@ -28,7 +28,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v35</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v36</div>
 </div>
 <div id="app"></div>
 <script src="cases.js"></script>
@@ -147,7 +147,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v35</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v36</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -542,7 +542,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v35').then(cache=>{
+      caches.open('stgym-v36').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -586,218 +586,56 @@ function importHistory(input){
 
 function rCreateQ(){
   const fwOptions=['PESTLE分析','5フォース分析','SWOT分析','クロスSWOT分析','アンゾフの成長マトリクス','STP分析','4P/4C分析','グロースモデル選択','KPI設計','実行戦略パターン'];
-  return`<div class="ctn fade-in">
-    ${rBackBtn()}
-    <div style="text-align:center;margin-bottom:20px">
-      <div style="font-size:16px;font-weight:800;color:#e8e4d9">✏️ 問題作成</div>
-      <div style="font-size:11px;color:#6b6860;margin-top:4px">Gemini AIで新しい問題を自動生成</div>
-    </div>
-    ${!gemKey?'<div style="background:#2a1a1a;border:1px solid #c4554e;border-radius:10px;padding:14px;margin-bottom:16px;color:#c4554e;font-size:12px">⚠️ Gemini APIキーが未設定です。設定画面でAPIキーを入力してください。</div>':''}
-    <div style="background:#0f0f0e;border-radius:12px;padding:16px">
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">業種・企業の説明</label>
-        <textarea id="cqIndustry" rows="3" placeholder="例：創業50年の地方老舗旅館。客室30室、年間売上3億円。近年はインバウンド需要で稼働率80%に回復..." style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:13px;font-family:inherit;box-sizing:border-box;resize:vertical;outline:none"></textarea>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">フレームワーク</label>
-          <select id="cqFw" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:12px;font-family:inherit;outline:none">
-            ${fwOptions.map(fw=>'<option value="'+fw+'">'+fw+'</option>').join('')}
-          </select>
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">難易度</label>
-          <select id="cqDiff" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:12px;font-family:inherit;outline:none">
-            <option value="初級">🟢 初級</option><option value="中級">🟡 中級</option><option value="上級" selected>🔴 上級</option>
-          </select>
-        </div>
-      </div>
-      <button onclick="generateQuestion()" class="btn" style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px" id="cqGenBtn"${!gemKey?' disabled style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px;opacity:0.4"':''}>🤖 3.1 Pro で問題を生成</button>
-    </div>
-    <div id="cqResult" style="margin-top:16px"></div>
-  </div>`;
-}
+  const industries=[
+    {cat:'製造',items:['食品メーカー','飲料メーカー','化学メーカー','自動車部品','電子機器','医薬品','化粧品','繊維・アパレル','建材','農業機械']},
+    {cat:'小売・流通',items:['スーパーマーケット','コンビニ','ドラッグストア','家電量販店','ホームセンター','アパレルショップ','EC専業','百貨店','リサイクルショップ','花屋']},
+    {cat:'飲食',items:['ファミレスチェーン','ラーメン店','カフェチェーン','居酒屋チェーン','高級レストラン','宅配ピザ','回転寿司','ベーカリー','クラフトビール醸造所','給食サービス']},
+    {cat:'IT・テック',items:['SaaS企業','ゲーム開発','Webマーケティング','AI開発','サイバーセキュリティ','Edtech','Fintech','IoTプラットフォーム','データ分析','RPA']},
+    {cat:'サービス',items:['人材紹介','コンサルティング','学習塾','フィットネスジム','美容サロン','介護サービス','保育園','旅行代理店','ウエディング','清掃サービス']},
+    {cat:'医療・ヘルスケア',items:['クリニック','調剤薬局','医療機器','健康食品','ペットクリニック','訪問看護','歯科医院','検査キット','デジタル治療','メンタルヘルス']},
+    {cat:'不動産・建設',items:['住宅デベロッパー','リフォーム会社','ビル管理','シェアオフィス','建設会社','不動産仲介','民泊運営','スマートシティ開発','解体業','建設DX']},
+    {cat:'金融・保険',items:['地方銀行','ネット証券','保険代理店','クレジットカード','リース会社','暗号資産取引所','ロボアドバイザー','ファクタリング','マイクロ保険','決済サービス']},
+    {cat:'物流・運輸',items:['宅配便','倉庫業','引越し','タクシー','トラック運送','海運','航空貨物','ラストマイル配送','冷蔵物流','ドローン配送']},
+    {cat:'エネルギー・環境',items:['太陽光発電','EV充電インフラ','廃棄物処理','水処理','蓄電池','カーボンクレジット','バイオ燃料','風力発電','スマートグリッド','リサイクル']}
+  ];
+  const scales=['スタートアップ（従業員10名以下）','中小企業（50〜200名）','中堅企業（200〜1000名）','大企業（1000名以上）'];
+  const situations=['業績好調で拡大フェーズ','業績横ばいで成長の壁','業績悪化で立て直し中','新規事業を模索中','デジタル変革に着手','海外展開を検討中','競合の台頭で危機感','規制変更への対応が必要'];
 
-async function generateQuestion(){
-  const industry=document.getElementById('cqIndustry').value.trim();
-  const fw=document.getElementById('cqFw').value;
-  const diff=document.getElementById('cqDiff').value;
-  const btn=document.getElementById('cqGenBtn');
-  const result=document.getElementById('cqResult');
-  
-  if(!industry){alert('業種・企業の説明を入力してください');return;}
-  if(!gemKey){alert('APIキーを設定してください');return;}
-  
-  btn.disabled=true;btn.textContent='⏳ 生成中...';
-  result.innerHTML='<div style="text-align:center;color:#6b6860;padding:20px">AIが問題を作成しています...</div>';
-  
-  const _fwGuide={
-'PESTLE分析':'選択肢は「要因」を記述すること。戦略（〜を拡大する、〜に特化し等）は絶対に書かない。例:「脱炭素政策の加速×再エネ補助金の拡大」「少子高齢化による労働力不足の深刻化」',
-'5フォース分析':'選択肢は「脅威」や「競争構造」を記述すること。対抗策は書かない。例:「Amazon薬局の日本参入による価格破壊リスク」',
-'SWOT分析':'選択肢は「戦略の方向性」を記述。強み×機会の組合せを活用した具体策。',
-'クロスSWOT分析':'SO/WO/ST/WTの戦略を記述するが、SO:やWO:のような接頭辞は絶対につけない。',
-'アンゾフの成長マトリクス':'市場浸透/新製品開発/新市場開拓/多角化の戦略を記述するが、「市場浸透：」のような接頭辞は絶対につけない。',
-'STP分析':'ターゲットセグメントとポジショニングの組合せを記述。',
-'4P/4C分析':'Product/Price/Place/Promotionの施策を記述するが、「Product：」のような接頭辞は絶対につけない。',
-'グロースモデル選択':'PLG/SLG/MLGなどのモデル名の接頭辞は絶対につけない。モデルの中身を平易に記述。',
-'KPI設計':'選択肢はKPI指標を記述（○○率、○○数、○○額など測定可能な指標）。戦略文は書かない。',
-'実行戦略パターン':'具体的な実行施策を記述。'
-};
-const _diffGuide=diff==='初級'?'【初級ルール】正解が1つだけ明確。不正解は「惜しいが筋が悪い」レベル。問題が単純であり選択肢の質は高品質に保つ。':diff==='中級'?'【中級ルール】2つで迷うレベル。不正解も別の文脈なら正解になりうる。':'【上級ルール】全選択肢がもっともらしい。計算・推論が必要。文章が長い選択肢が正答にならないこと。';
-const prompt=`あなたは事業戦略クイズの問題作成の専門家です。以下の【絶対ルール】を厳守し、4択問題を1問作成してください。
-
-【業種・企業】${industry}
-【フレームワーク】${fw}
-【難易度】${diff}
-
-━━━ 絶対ルール（違反は不合格）━━━
-
-■ 選択肢label（最重要）
-- 全4選択肢のlabelを15〜40文字で揃えること
-- 正答だけが長い/詳しいのは絶対禁止。不正解も同じ詳細度で書くこと
-- 正答のlabelが不正解の平均の1.5倍を超えてはならない
-- フレームワーク用語の接頭辞（SO:, WO:, Product:, PLG:, 市場浸透:, 代替品:, Political:等）は絶対につけない
-- ①②③④の番号は使わない
-- 「この方向性で〜」「経営資源を集中し〜」等のテンプレート的な汎用表現は禁止
-- 助詞（を、で、に、の、と、は、が）で文が終わってはならない
-- 「×」は正答だけに使わないこと（使うなら不正解にも使う）
-- ${_fwGuide[fw]||''}
-
-■ description
-- 各選択肢に20文字以上のdescriptionを必ずつける
-- なぜその戦略が有効/リスクがあるかの具体的説明
-
-■ situation（状況文）
-- 100〜200文字で企業の具体的数値（売上、従業員数、シェア等）を含める
-- 業界の競争環境と外部環境の変化を具体的に記述
-
-■ explanation（解説）
-- なぜbestAnswerが最適かを論理的に説明
-- 他の3つの選択肢がなぜ次善/不適切かも各1文で説明
-- A/B/C/Dの文字で参照する場合は現在の選択肢配置と一致させること
-
-■ 難易度
-- ${_diffGuide}
-
-■ bestAnswer
-- 正答のポジションはa/b/c/dの中からランダムに選ぶ（aに偏らないこと）
-
-━━━ 出力形式 ━━━
-以下のJSONのみ出力。JSON以外は一切出力しないこと。マークダウンのコードブロックも不要。
-{"industry":"業種名","situation":"状況文","question":"設問文","options":[{"id":"a","label":"選択肢A","description":"詳細説明A"},{"id":"b","label":"選択肢B","description":"詳細説明B"},{"id":"c","label":"選択肢C","description":"詳細説明C"},{"id":"d","label":"選択肢D","description":"詳細説明D"}],"bestAnswer":"正答id","explanation":"解説文","keyFramework":"FW適用ポイント","realExample":"実在企業の類似事例"}`;
-
-  try{
-    const activeModel='pro31';
-    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_INFO[activeModel].api+':generateContent?key='+gemKey,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.8}})
-    });
-    const data=await res.json();
-    if(!data.candidates||!data.candidates[0]){throw new Error(data.error?.message||'応答なし');}
-    
-    let text=data.candidates[0].content.parts.map(p=>p.text||'').join('');
-    text=text.replace(/```json|```/g,'').trim();
-    const q=JSON.parse(text);
-    
-    // === STEP 1: Programmatic Quality Check ===
-    q.id=CASES.length>0?Math.max(...CASES.map(c=>c.id))+1:1;
-    q.difficulty=diff;
-    q.framework=fw;
-    
-    var qcErrors=[];
-        
-    // Structure checks
-    if(!q.options||q.options.length!==4) qcErrors.push('選択肢が4つありません');
-    if(!q.bestAnswer||!['a','b','c','d'].includes(q.bestAnswer)) qcErrors.push('bestAnswerが不正（a/b/c/d以外）');
-    if(!q.situation||q.situation.length<30) qcErrors.push('状況文が短すぎます（'+((q.situation||'').length)+'文字）');
-    if(!q.question||q.question.length<5) qcErrors.push('設問文がありません');
-    if(!q.explanation||q.explanation.length<30) qcErrors.push('解説が短すぎます');
-    
-    if(q.options&&q.options.length===4){
-      // Option ID check
-      var optIds=q.options.map(function(o){return o.id;}).sort().join('');
-      if(optIds!=='abcd') qcErrors.push('選択肢IDがa/b/c/dではありません: '+optIds);
-      
-      // bestAnswer exists in options
-      if(!q.options.find(function(o){return o.id===q.bestAnswer;})) qcErrors.push('bestAnswer「'+q.bestAnswer+'」が選択肢に存在しません');
-      
-      // Label length balance
-      var bestLabel=q.options.find(function(o){return o.id===q.bestAnswer;});
-      var otherLabels=q.options.filter(function(o){return o.id!==q.bestAnswer;});
-      if(bestLabel&&otherLabels.length===3){
-        var bestLen=bestLabel.label.length;
-        var avgOther=otherLabels.reduce(function(s,o){return s+o.label.length;},0)/3;
-        if(avgOther>0&&bestLen/avgOther>=2.0) qcErrors.push('正答のlabelが不正解の'+Math.round(bestLen/avgOther*10)/10+'倍長い（正答が目立つ）');
-        if(avgOther>0&&bestLen/avgOther<=0.5) qcErrors.push('正答のlabelが不正解より極端に短い');
-      }
-      
-      // Truncated labels (ending with particles)
-      q.options.forEach(function(o){
-        if(o.label.length>=5){
-          var last=o.label[o.label.length-1];
-          if('をでにのとはがしてりめけさせ'.indexOf(last)>=0) qcErrors.push(o.id.toUpperCase()+'の選択肢が途中で途切れています: 「...'+o.label.slice(-10)+'」');
-        }
-        if(o.label.length<8) qcErrors.push(o.id.toUpperCase()+'の選択肢が短すぎます（'+o.label.length+'文字）');
-        if(!o.description||o.description.length<5) qcErrors.push(o.id.toUpperCase()+'のdescriptionが不足');
-      });
-      
-      // FW-specific checks
-      if(fw==='PESTLE分析'&&(q.question.indexOf('要因')>=0||q.question.indexOf('注視')>=0)){
-        q.options.forEach(function(o){
-          if(o.label.indexOf('を拡大する')>=0||o.label.indexOf('に特化し')>=0||o.label.indexOf('で差別化')>=0)
-            qcErrors.push(o.id.toUpperCase()+': PESTLE要因の問題に戦略文が含まれています');
-        });
-      }
-    }
-    
-    // Show programmatic check results
-    var checkHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
-      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:10px">📋 品質チェック結果</div>';
-    
-    if(qcErrors.length>0){
-      checkHtml+='<div style="margin-bottom:8px">';
-      qcErrors.forEach(function(e){checkHtml+='<div style="font-size:11px;color:#c4554e;padding:3px 0">❌ '+e+'</div>';});
-      checkHtml+='</div>';
-    }
-    if(qcErrors.length===0){
-      checkHtml+='<div style="font-size:11px;color:#4a9e6e;padding:3px 0">✅ 構造チェック：問題なし</div>';
-    }
-    checkHtml+='</div>';
-    
-    // Preview
-    var previewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
-      +'<div style="font-size:13px;font-weight:700;color:#4a9e6e;margin-bottom:10px">✓ 問題プレビュー</div>'
-      +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+q.industry+' / '+q.framework+' / '+q.difficulty+'</div>'
-      +'<div style="font-size:13px;color:#e8e4d9;margin-bottom:10px;line-height:1.6">'+q.situation+'</div>'
-      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">'+q.question+'</div>'
-      +q.options.map(function(o){return '<div style="padding:8px 10px;margin:4px 0;border-radius:6px;font-size:12px;'+(o.id===q.bestAnswer?'background:#1a2a1a;border:1px solid #4a9e6e;color:#4a9e6e':'background:#1a1a18;color:#a09d93')+'">'
-        +o.id.toUpperCase()+': '+o.label+(o.id===q.bestAnswer?' ✓':'')+'</div>';}).join('')
-      +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5"><b>解説:</b> '+(q.explanation||'').substring(0,200)+'...</div>'
-      +'</div>';
-    
-    // AI Review section
-    var aiReviewHtml='<div id="aiReviewSection" style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
-      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">🤖 AI品質レビュー</div>'
-      +'<button onclick="runAiReview()" class="btn" style="background:#3a3a38;color:#e8e4d9;padding:10px;font-size:12px">◆ 3.1 Pro でレビュー実行</button>'
-      +'<div id="aiReviewResult" style="margin-top:8px"></div>'
-      +'</div>';
-    
-    // Action buttons
-    var actionsHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-      +(qcErrors.length===0?'<button onclick="addGeneratedQuestion()" class="btn" style="background:#4a9e6e;color:#fff;padding:12px;font-size:13px">✓ 追加する</button>':'<button disabled class="btn" style="background:#2a2a28;color:#4a4840;padding:12px;font-size:13px">❌ エラーあり</button>')
-      +'<button onclick="screen=\'create_q\';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;padding:12px;font-size:13px">✗ やり直す</button>'
-      +'</div>';
-    
-    result.innerHTML=checkHtml+previewHtml+aiReviewHtml+actionsHtml;
-    
-    // Store temporarily
-    window._pendingQuestion=q;
-    
-  }catch(err){
-    result.innerHTML='<div style="background:#2a1a1a;border-radius:10px;padding:14px;color:#c4554e;font-size:12px">⚠️ '+err.message+'</div>';
-  }finally{
-    btn.disabled=false;btn.textContent='🤖 3.1 Pro で問題を生成';
-  }
+  return'<div class="ctn fade-in">'
+    +rBackBtn()
+    +'<div style="text-align:center;margin-bottom:20px">'
+    +'<div style="font-size:16px;font-weight:800;color:#e8e4d9">✏️ 問題作成</div>'
+    +'<div style="font-size:11px;color:#6b6860;margin-top:4px">条件を選択 → AIが自動生成</div></div>'
+    +(!gemKey?'<div style="background:#2a1a1a;border:1px solid #c4554e;border-radius:10px;padding:14px;margin-bottom:16px;color:#c4554e;font-size:12px">⚠️ 設定画面でGemini APIキーを入力してください</div>':'')
+    +'<div style="background:#0f0f0e;border-radius:12px;padding:16px">'
+    +'<div style="margin-bottom:14px">'
+    +'<label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">業種カテゴリ</label>'
+    +'<select id="cqCat" onchange="document.getElementById(\'cqInd\').innerHTML=\'\';var c=this.value;'+JSON.stringify(industries)+'.find(function(x){return x.cat===c;})?.items.forEach(function(it){var o=document.createElement(\'option\');o.value=it;o.textContent=it;document.getElementById(\'cqInd\').appendChild(o);});" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:13px;font-family:inherit;outline:none">'
+    +'<option value="">選択してください</option>'
+    +industries.map(function(g){return'<option value="'+g.cat+'">'+g.cat+'</option>';}).join('')
+    +'</select></div>'
+    +'<div style="margin-bottom:14px">'
+    +'<label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">業種</label>'
+    +'<select id="cqInd" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:13px;font-family:inherit;outline:none"><option value="">↑ カテゴリを選択</option></select></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">企業規模</label>'
+    +'<select id="cqScale" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:11px;font-family:inherit;outline:none">'
+    +scales.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('')
+    +'</select></div>'
+    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">経営状況</label>'
+    +'<select id="cqSit" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:11px;font-family:inherit;outline:none">'
+    +situations.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('')
+    +'</select></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">フレームワーク</label>'
+    +'<select id="cqFw" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:12px;font-family:inherit;outline:none">'
+    +fwOptions.map(function(fw){return'<option value="'+fw+'">'+fw+'</option>';}).join('')
+    +'</select></div>'
+    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">難易度</label>'
+    +'<select id="cqDiff" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:12px;font-family:inherit;outline:none">'
+    +'<option value="初級">🟢 初級</option><option value="中級">🟡 中級</option><option value="上級" selected>🔴 上級</option></select></div></div>'
+    +'<button onclick="generateQuestion()" class="btn" style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px" id="cqGenBtn"'+(gemKey?'':'disabled style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px;opacity:0.4"')+'>🤖 3.1 Pro で問題を生成</button>'
+    +'</div><div id="cqResult" style="margin-top:16px"></div></div>';
 }
 
 function addGeneratedQuestion(){
@@ -806,7 +644,7 @@ function addGeneratedQuestion(){
   // Update cache
   try{
     const blob=new Blob([JSON.stringify(CASES)],{type:'application/json'});
-    caches.open('stgym-v35').then(cache=>{
+    caches.open('stgym-v36').then(cache=>{
       cache.put(new Request('./cases.json'),new Response(blob));
     });
   }catch(e){}
