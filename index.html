@@ -42,6 +42,12 @@ async function loadCases() {
     render();
   } catch(e) {
     console.error('cases.json読み込み失敗:', e);
+    // SW が邪魔している可能性 → 解除して再読込
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs){await r.unregister();}
+      if(regs.length>0){location.reload();return;}
+    }
     document.getElementById('app').innerHTML = '<div style="padding:40px;text-align:center;color:#e8e4d9"><h2>問題データの読み込みに失敗しました</h2><p style="color:#a09d93;margin-top:12px">ネットワーク接続を確認し、ページを再読み込みしてください。</p><button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;background:#5b8fb9;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">再読み込み</button></div>';
   }
 }
