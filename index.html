@@ -28,7 +28,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v37</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v38</div>
 </div>
 <div id="app"></div>
 <script src="cases.js"></script>
@@ -147,7 +147,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v37</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v38</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -542,7 +542,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v37').then(cache=>{
+      caches.open('stgym-v38').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -638,13 +638,137 @@ function rCreateQ(){
     +'</div><div id="cqResult" style="margin-top:16px"></div></div>';
 }
 
+async function generateQuestion(){
+  const indVal=document.getElementById('cqInd').value;
+  const scaleVal=document.getElementById('cqScale').value;
+  const sitVal=document.getElementById('cqSit').value;
+  const fw=document.getElementById('cqFw').value;
+  const diff=document.getElementById('cqDiff').value;
+  const btn=document.getElementById('cqGenBtn');
+  const result=document.getElementById('cqResult');
+  
+  if(!indVal){alert('業種を選択してください');return;}
+  if(!gemKey){alert('APIキーを設定してください');return;}
+  const industry=indVal+'（'+scaleVal+'、'+sitVal+'）';
+  
+  btn.disabled=true;btn.textContent='⏳ 生成中...';
+  result.innerHTML='<div style="text-align:center;color:#6b6860;padding:20px">AIが問題を作成しています...</div>';
+  
+  const _fwGuide={
+'PESTLE分析':'選択肢は「要因」を記述。戦略は書かない。例:脱炭素政策の加速×再エネ補助金の拡大',
+'5フォース分析':'選択肢は「脅威」や「競争構造」を記述。対抗策は書かない。',
+'SWOT分析':'選択肢は「戦略の方向性」を記述。',
+'クロスSWOT分析':'SO/WO/ST/WTの戦略を記述するがSO:等の接頭辞は禁止。',
+'アンゾフの成長マトリクス':'市場浸透/新製品開発等の戦略を記述するが接頭辞は禁止。',
+'STP分析':'ターゲットセグメントとポジショニングの組合せを記述。',
+'4P/4C分析':'Product/Price/Place/Promotionの施策を記述するが接頭辞は禁止。',
+'グロースモデル選択':'PLG/SLG等のモデル名の接頭辞は禁止。中身を平易に記述。',
+'KPI設計':'選択肢はKPI指標を記述。戦略文は書かない。',
+'実行戦略パターン':'具体的な実行施策を記述。'
+  };
+  const _diffGuide=diff==='初級'?'正解が明確。不正解は惜しいが筋が悪いレベル。':diff==='中級'?'2つで迷うレベル。不正解も別文脈なら正解。':'全選択肢がもっともらしい。文章が長い選択肢が正答にならないこと。';
+  
+  const prompt='あなたは事業戦略クイズの問題作成の専門家です。以下の絶対ルールを厳守し4択問題を1問作成してください。\n\n'
+    +'【業種・企業】'+industry+'\n【フレームワーク】'+fw+'\n【難易度】'+diff+'\n\n'
+    +'■ 選択肢label（最重要）\n'
+    +'- 全4選択肢のlabelを15〜40文字で揃えること\n'
+    +'- 正答だけが長い/詳しいのは絶対禁止\n'
+    +'- FW用語の接頭辞（SO:,WO:,Product:,PLG:等）は絶対禁止\n'
+    +'- テンプレ表現（この方向性で〜、経営資源を集中〜）は禁止\n'
+    +'- 助詞で文が終わってはならない\n'
+    +'- '+(_fwGuide[fw]||'')+'\n\n'
+    +'■ description: 各選択肢に20文字以上の詳細説明\n'
+    +'■ situation: 100〜200文字で具体的数値を含める\n'
+    +'■ explanation: bestAnswerが最適な理由＋他3つがなぜ不適切かを説明\n'
+    +'■ 難易度: '+_diffGuide+'\n'
+    +'■ bestAnswer: a/b/c/dからランダムに選ぶ\n\n'
+    +'以下のJSONのみ出力。JSON以外は一切出力しないこと。\n'
+    +'{"industry":"業種名","situation":"状況文","question":"設問文","options":[{"id":"a","label":"選択肢A","description":"詳細A"},{"id":"b","label":"選択肢B","description":"詳細B"},{"id":"c","label":"選択肢C","description":"詳細C"},{"id":"d","label":"選択肢D","description":"詳細D"}],"bestAnswer":"正答id","explanation":"解説文","keyFramework":"FW適用ポイント","realExample":"実在企業の類似事例"}';
+
+  try{
+    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_INFO.pro31.api+':generateContent?key='+gemKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.8}})
+    });
+    const data=await res.json();
+    if(!data.candidates||!data.candidates[0]){throw new Error(data.error?.message||'応答なし');}
+    
+    var text=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');
+    text=text.replace(/```json|```/g,'').trim();
+    var q=JSON.parse(text);
+    
+    q.id=CASES.length>0?Math.max.apply(null,CASES.map(function(c){return c.id;}))+1:1;
+    q.difficulty=diff;
+    q.framework=fw;
+    
+    var qcErrors=[];
+    if(!q.options||q.options.length!==4) qcErrors.push('選択肢が4つありません');
+    if(!q.bestAnswer||['a','b','c','d'].indexOf(q.bestAnswer)<0) qcErrors.push('bestAnswerが不正');
+    if(!q.situation||q.situation.length<30) qcErrors.push('状況文が短すぎます');
+    if(!q.question||q.question.length<5) qcErrors.push('設問文がありません');
+    if(!q.explanation||q.explanation.length<30) qcErrors.push('解説が短すぎます');
+    
+    if(q.options&&q.options.length===4){
+      var optIds=q.options.map(function(o){return o.id;}).sort().join('');
+      if(optIds!=='abcd') qcErrors.push('選択肢IDがa/b/c/dではありません');
+      if(!q.options.find(function(o){return o.id===q.bestAnswer;})) qcErrors.push('bestAnswerが選択肢に存在しません');
+      var bestL=q.options.find(function(o){return o.id===q.bestAnswer;});
+      var othL=q.options.filter(function(o){return o.id!==q.bestAnswer;});
+      if(bestL&&othL.length===3){
+        var bLen=bestL.label.length;var aOth=othL.reduce(function(s,o){return s+o.label.length;},0)/3;
+        if(aOth>0&&bLen/aOth>=2.0) qcErrors.push('正答labelが不正解の'+Math.round(bLen/aOth*10)/10+'倍長い');
+      }
+      q.options.forEach(function(o){
+        if(o.label.length>=5&&'をでにのとはがしてりめけさせ'.indexOf(o.label[o.label.length-1])>=0) qcErrors.push(o.id.toUpperCase()+' 途切れ');
+        if(o.label.length<8) qcErrors.push(o.id.toUpperCase()+' 短すぎ('+o.label.length+'文字)');
+        if(!o.description||o.description.length<5) qcErrors.push(o.id.toUpperCase()+' description不足');
+      });
+    }
+    
+    var checkHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:10px">📋 品質チェック</div>';
+    if(qcErrors.length>0){
+      qcErrors.forEach(function(e){checkHtml+='<div style="font-size:11px;color:#c4554e;padding:3px 0">❌ '+e+'</div>';});
+    }else{
+      checkHtml+='<div style="font-size:11px;color:#4a9e6e">✅ 全チェック合格</div>';
+    }
+    checkHtml+='</div>';
+    
+    var previewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#4a9e6e;margin-bottom:10px">✓ 問題プレビュー</div>'
+      +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+q.industry+' / '+q.framework+' / '+q.difficulty+'</div>'
+      +'<div style="font-size:13px;color:#e8e4d9;margin-bottom:10px;line-height:1.6">'+q.situation+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">'+q.question+'</div>'
+      +q.options.map(function(o){return'<div style="padding:8px 10px;margin:4px 0;border-radius:6px;font-size:12px;'+(o.id===q.bestAnswer?'background:#1a2a1a;border:1px solid #4a9e6e;color:#4a9e6e':'background:#1a1a18;color:#a09d93')+'">'
+        +o.id.toUpperCase()+': '+o.label+(o.id===q.bestAnswer?' ✓':'')+'</div>';}).join('')
+      +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5">'+(q.explanation||'').substring(0,200)+'...</div></div>';
+    
+    var aiReviewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">🤖 AI品質レビュー</div>'
+      +'<button onclick="runAiReview()" class="btn" style="background:#3a3a38;color:#e8e4d9;padding:10px;font-size:12px">◆ 3.1 Pro でレビュー実行</button>'
+      +'<div id="aiReviewResult" style="margin-top:8px"></div></div>';
+    
+    var actHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +(qcErrors.length===0?'<button onclick="addGeneratedQuestion()" class="btn" style="background:#4a9e6e;color:#fff;padding:12px;font-size:13px">✓ 追加する</button>':'<button disabled class="btn" style="background:#2a2a28;color:#4a4840;padding:12px;font-size:13px">❌ エラーあり</button>')
+      +'<button onclick="screen=\'create_q\';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;padding:12px;font-size:13px">✗ やり直す</button></div>';
+    
+    result.innerHTML=checkHtml+previewHtml+aiReviewHtml+actHtml;
+    window._pendingQuestion=q;
+    
+  }catch(err){
+    result.innerHTML='<div style="background:#2a1a1a;border-radius:10px;padding:14px;color:#c4554e;font-size:12px">⚠️ '+err.message+'</div>';
+  }finally{
+    btn.disabled=false;btn.textContent='🤖 3.1 Pro で問題を生成';
+  }
+}
+
 function addGeneratedQuestion(){
   if(!window._pendingQuestion)return;
   CASES.push(window._pendingQuestion);
   // Update cache
   try{
     const blob=new Blob([JSON.stringify(CASES)],{type:'application/json'});
-    caches.open('stgym-v37').then(cache=>{
+    caches.open('stgym-v38').then(cache=>{
       cache.put(new Request('./cases.json'),new Response(blob));
     });
   }catch(e){}
