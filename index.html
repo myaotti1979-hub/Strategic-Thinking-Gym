@@ -35,7 +35,7 @@
 let CASES = [];
 async function loadCases() {
   try {
-    const res = await fetch('./cases.json');
+    const res = await fetch('./cases.json?t='+Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
     CASES = await res.json();
     console.log('✓ ' + CASES.length + '問読み込み');
