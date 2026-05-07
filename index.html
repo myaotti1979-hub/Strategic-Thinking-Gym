@@ -1571,7 +1571,7 @@ function rCompSetup(){
 function rD(){return Array.from({length:total}).map((_,i)=>{let c='dt';if(i===idx)c+=' ac';if(results[i]==='correct')c+=' ok';if(results[i]==='wrong')c+=' ng';return`<div class="${c}"></div>`;}).join('');}
 function rQ(){
   const c=quiz[idx],isR=rev,ok=results[idx]==='correct',isComp=c.industry.includes('総合');
-  const chatUI=isR&&gemKey?rChat(c,ok):'';
+  let chatUI='';try{if(isR&&gemKey)chatUI=rChat(c,ok);}catch(e){console.log('chat render error:',e);}
   return`<div class="ctn fade-in">
   <div style="margin-bottom:12px">${rBackBtn('やめる')}</div>
   <div class="hdr"><div><div class="hl">Strategic Thinking Gym</div><div class="ht">ケースで鍛える事業戦略フレームワーク</div></div><div><div style="color:#6b6860;font-size:11px;font-weight:600;margin-bottom:6px;text-align:right">Q${idx+1} / ${total}</div><div class="pg">${rD()}</div></div></div>
