@@ -28,7 +28,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v39</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v40</div>
 </div>
 <div id="app"></div>
 <script src="cases.js"></script>
@@ -147,7 +147,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v39</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v40</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -204,6 +204,10 @@ function rIndividualSetup(){
   const fp=aFw==='all'?indv:indv.filter(c=>c.framework===aFw);
   const dfp=window.aDiff&&window.aDiff!=='all'?fp.filter(c=>c.difficulty===window.aDiff):fp;
   return`<div class="ctn fade-in">
+  <div style="display:flex;gap:0;margin-bottom:16px;background:#1a1a18;border-radius:10px;padding:3px">
+    <button onclick="questionSource='claude';render()" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;\${questionSource==='claude'?'background:#5b8fb9;color:#fff':'background:transparent;color:#6b6860'}">📘 Claude（\${CASES.length}問）</button>
+    <button onclick="questionSource='gemini';render()" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;\${questionSource==='gemini'?'background:#5b8fb9;color:#fff':'background:transparent;color:#6b6860'}">🤖 Gemini（\${GEMINI_CASES.length}問）</button>
+  </div>
   ${rBackBtn('ホームに戻る')}
   <div style="text-align:center;margin:12px 0 20px"><div style="font-size:18px;font-weight:800">📝 個別問題</div></div>
 
@@ -542,7 +546,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v39').then(cache=>{
+      caches.open('stgym-v40').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -788,7 +792,7 @@ function addGeneratedQuestion(){
   // Update cache
   try{
     const blob=new Blob([JSON.stringify(CASES)],{type:'application/json'});
-    caches.open('stgym-v39').then(cache=>{
+    caches.open('stgym-v40').then(cache=>{
       cache.put(new Request('./cases.json'),new Response(blob));
     });
   }catch(e){}
