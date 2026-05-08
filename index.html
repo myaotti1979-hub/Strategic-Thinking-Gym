@@ -28,7 +28,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v45</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v46</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -167,7 +167,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v45</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v46</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -570,7 +570,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v45').then(cache=>{
+      caches.open('stgym-v46').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -662,7 +662,12 @@ function rCreateQ(){
     +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">難易度</label>'
     +'<select id="cqDiff" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:12px;font-family:inherit;outline:none">'
     +'<option value="初級">🟢 初級</option><option value="中級">🟡 中級</option><option value="上級" selected>🔴 上級</option></select></div></div>'
-    +'<button onclick="generateQuestion()" class="btn" style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px" id="cqGenBtn"'+(gemKey?'':'disabled style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px;opacity:0.4"')+'>🤖 3.1 Pro で問題を生成</button>'
+    +'<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">生成モデル</label>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<button type="button" id="cqModel31" onclick="document.getElementById(\'cqModelVal\').value=\'pro31\';this.style.background=\'#5b8fb9\';this.style.color=\'#fff\';document.getElementById(\'cqModel25\').style.background=\'#1a1a18\';document.getElementById(\'cqModel25\').style.color=\'#6b6860\'" style="padding:10px;border:1px solid #2a2a28;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:#5b8fb9;color:#fff">◆ 3.1 Pro</button>'
+    +'<button type="button" id="cqModel25" onclick="document.getElementById(\'cqModelVal\').value=\'pro25\';this.style.background=\'#5b8fb9\';this.style.color=\'#fff\';document.getElementById(\'cqModel31\').style.background=\'#1a1a18\';document.getElementById(\'cqModel31\').style.color=\'#6b6860\'" style="padding:10px;border:1px solid #2a2a28;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:#1a1a18;color:#6b6860">💎 2.5 Pro</button>'
+    +'</div><input type="hidden" id="cqModelVal" value="pro31"></div>'
+    +'<button onclick="generateQuestion()" class="btn" style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px" id="cqGenBtn"'+(gemKey?'':'disabled style="background:#5b8fb9;color:#fff;padding:14px;font-size:14px;opacity:0.4"')+'>🤖 問題を生成</button>'
     +'</div><div id="cqResult" style="margin-top:16px"></div></div>';
 }
 
@@ -680,7 +685,7 @@ async function generateQuestion(){
   const industry=indVal+'（'+scaleVal+'、'+sitVal+'）';
   
   btn.disabled=true;btn.textContent='⏳ 生成中...';
-  result.innerHTML='<div style="padding:16px"><div id="cqProgress" style="font-size:12px;color:#d4a853;line-height:2">⏳ Gemini 3.1 Pro に接続中...</div></div>';
+  result.innerHTML='<div style="padding:16px"><div id="cqProgress" style="font-size:12px;color:#d4a853;line-height:2">⏳ Gemini に接続中...</div></div>';
   
   const _fwGuide={
 'PESTLE分析':'選択肢は「要因」を記述。戦略は書かない。例:脱炭素政策の加速×再エネ補助金の拡大',
@@ -723,7 +728,7 @@ async function generateQuestion(){
         await new Promise(r=>setTimeout(r,5000));
       }
       try{
-        var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_INFO.pro31.api+':generateContent?key='+gemKey,{
+        var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[document.getElementById('cqModelVal')?.value||'pro31']||MODEL_INFO.pro31).api+':generateContent?key='+gemKey,{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.7}})
         });
@@ -816,7 +821,7 @@ async function generateQuestion(){
   }catch(err){
     result.innerHTML='<div style="background:#2a1a1a;border-radius:10px;padding:14px;color:#c4554e;font-size:12px">⚠️ '+err.message+'</div>';
   }finally{
-    btn.disabled=false;btn.textContent='🤖 3.1 Pro で問題を生成';
+    btn.disabled=false;btn.textContent='🤖 問題を生成';
   }
 }
 
