@@ -34,6 +34,13 @@
 <script src="cases.js"></script>
 <script>
 // CASES loaded via <script src="cases.js">
+if(typeof CASES==='undefined'||!Array.isArray(CASES)){
+  document.addEventListener('DOMContentLoaded',function(){
+    document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#e8e4d9"><h2>問題データの読み込みに失敗しました</h2><p style="color:#a09d93;margin-top:12px">cases.jsが見つかりません。</p><button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;background:#5b8fb9;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">再読み込み</button></div>';
+    var sp=document.getElementById('splash');if(sp)sp.style.display='none';
+  });
+  var CASES=[];
+}
 let GEMINI_CASES = [];
 try{var gq=JSON.parse(localStorage.getItem('gemini_questions')||'[]');if(gq.length>0){GEMINI_CASES=gq;}}catch(e){}
 
