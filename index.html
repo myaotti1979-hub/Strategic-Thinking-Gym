@@ -720,12 +720,25 @@ async function generateQuestion(){
     +'{"industry":"業種名","situation":"状況文","question":"設問文","options":[{"id":"a","label":"選択肢A","description":"詳細A"},{"id":"b","label":"選択肢B","description":"詳細B"},{"id":"c","label":"選択肢C","description":"詳細C"},{"id":"d","label":"選択肢D","description":"詳細D"}],"bestAnswer":"正答id","explanation":"解説文","keyFramework":"FW適用ポイント","realExample":"実在企業の類似事例"}';
 
   try{
-    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_INFO.pro31.api+':generateContent?key='+gemKey,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.7}})
-    });
-    const data=await res.json();
-    if(!data.candidates||!data.candidates[0]){throw new Error(data.error?.message||'応答なし');}
+    // 3.1 Proで最大3回リトライ（503対策）
+    var data=null;
+    for(var _retry=0;_retry<3;_retry++){
+      if(_retry>0){
+        var pg2=document.getElementById('cqProgress');
+        if(pg2){var d2=document.createElement('div');d2.style.cssText='color:#d4a853;font-size:11px';d2.textContent='⚠️ 503エラー → '+(_retry+1)+'回目のリトライ（5秒後）...';pg2.appendChild(d2);}
+        await new Promise(r=>setTimeout(r,5000));
+      }
+      try{
+        var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_INFO.pro31.api+':generateContent?key='+gemKey,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.7}})
+        });
+        if(res.status===503){continue;}
+        data=await res.json();
+        if(data.candidates&&data.candidates[0])break;
+      }catch(e){continue;}
+    }
+    if(!data||!data.candidates||!data.candidates[0]){throw new Error('3.1 Proが応答しません（503）。しばらく待ってから再試行してください');}
     
     var text=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');
     text=text.replace(/```json|```/g,'').trim();
