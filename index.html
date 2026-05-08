@@ -681,12 +681,6 @@ async function generateQuestion(){
   
   btn.disabled=true;btn.textContent='⏳ 生成中...';
   result.innerHTML='<div style="padding:16px"><div id="cqProgress" style="font-size:12px;color:#d4a853;line-height:2">⏳ Gemini 3.1 Pro に接続中...</div></div>';
-  var pg=document.getElementById('cqProgress');
-  var pgTimer=setInterval(function(){
-    var msgs=['📝 企業シナリオを構築中...','🎯 選択肢を設計中...','✍️ 解説を作成中...','🔍 品質を検証中...'];
-    var dots=pg.querySelectorAll('div');
-    if(dots.length<msgs.length){var d=document.createElement('div');d.style.cssText='color:#6b6860;font-size:11px';d.textContent=msgs[dots.length];pg.appendChild(d);}
-  },3000);
   
   const _fwGuide={
 'PESTLE分析':'選択肢は「要因」を記述。戦略は書かない。例:脱炭素政策の加速×再エネ補助金の拡大',
@@ -725,7 +719,7 @@ async function generateQuestion(){
     for(var _retry=0;_retry<3;_retry++){
       if(_retry>0){
         var pg2=document.getElementById('cqProgress');
-        if(pg2){var d2=document.createElement('div');d2.style.cssText='color:#d4a853;font-size:11px';d2.textContent='⚠️ 503エラー → '+(_retry+1)+'回目のリトライ（5秒後）...';pg2.appendChild(d2);}
+        if(pg2){pg2.innerHTML='<div style="color:#d4a853">⚠️ 503エラー → '+(_retry+1)+'回目のリトライ（5秒後）...</div>';}
         await new Promise(r=>setTimeout(r,5000));
       }
       try{
@@ -738,11 +732,14 @@ async function generateQuestion(){
         if(data.candidates&&data.candidates[0])break;
       }catch(e){continue;}
     }
-    if(!data||!data.candidates||!data.candidates[0]){throw new Error('3.1 Proが応答しません（503）。しばらく待ってから再試行してください');}
+    if(!data||!data.candidates||!data.candidates[0]){var _errMsg='3.1 Pro エラー';
+    try{if(data&&data.error)_errMsg+=': '+JSON.stringify(data.error).substring(0,200);}catch(x){}
+    if(res&&res.status)_errMsg+=' (HTTP '+res.status+')';
+    throw new Error(_errMsg);}
     
     var text=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');
     text=text.replace(/```json|```/g,'').trim();
-    clearInterval(pgTimer);
+    
     // JSON修復: 途切れている場合の補完
     if(!text.endsWith('}')){
       var lastBrace=text.lastIndexOf('}');
@@ -819,7 +816,7 @@ async function generateQuestion(){
   }catch(err){
     result.innerHTML='<div style="background:#2a1a1a;border-radius:10px;padding:14px;color:#c4554e;font-size:12px">⚠️ '+err.message+'</div>';
   }finally{
-    clearInterval(pgTimer);btn.disabled=false;btn.textContent='🤖 3.1 Pro で問題を生成';
+    btn.disabled=false;btn.textContent='🤖 3.1 Pro で問題を生成';
   }
 }
 
