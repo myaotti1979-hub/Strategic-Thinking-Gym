@@ -1,7 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="80" fill="#0a0a0a"/>
-  <path d="M256 80L430 180V320L256 420L82 320V180L256 80Z" stroke="#d4a853" stroke-width="8" fill="none"/>
-  <path d="M256 80L430 180L256 280L82 180L256 80Z" fill="#d4a853" opacity="0.15"/>
-  <path d="M256 160L370 225L256 290L142 225L256 160Z" fill="#d4a853" opacity="0.4"/>
-  <circle cx="256" cy="222" r="24" fill="#d4a853"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="hex" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0c040"/>
+      <stop offset="100%" stop-color="#e08020"/>
+    </linearGradient>
+    <linearGradient id="inner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5ba0d0"/>
+      <stop offset="100%" stop-color="#3070a0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Main hexagon - radius 210, center at 280 -->
+  <!-- r=210: top=70, TR=(438,175), BR=(438,385), bottom=490, TL=(74,175), BL=(74,385) -->
+  <polygon points="256,70 438,175 438,385 256,490 74,385 74,175" stroke="#f0c040" stroke-width="3" fill="none" opacity="0.2"/>
+  <polygon points="256,80 430,180 430,380 256,480 82,380 82,180" stroke="url(#hex)" stroke-width="8" fill="none" filter="url(#glow)"/>
+  <polygon points="256,80 430,180 430,380 256,480 82,380 82,180" fill="#f0c040" opacity="0.05"/>
+  <!-- Inner hexagon - radius 130 -->
+  <polygon points="256,150 369,215 369,345 256,410 143,345 143,215" fill="url(#inner)" opacity="0.2"/>
+  <polygon points="256,150 369,215 369,345 256,410 143,345 143,215" stroke="#5ba0d0" stroke-width="2.5" fill="none"/>
+  <!-- Nodes - bigger -->
+  <circle cx="256" cy="80" r="10" fill="#f0c040"/>
+  <circle cx="430" cy="180" r="10" fill="#f0c040"/>
+  <circle cx="430" cy="380" r="10" fill="#f0c040"/>
+  <circle cx="256" cy="480" r="10" fill="#f0c040"/>
+  <circle cx="82" cy="380" r="10" fill="#f0c040"/>
+  <circle cx="82" cy="180" r="10" fill="#f0c040"/>
+  <!-- Center circle -->
+  <circle cx="256" cy="280" r="55" fill="url(#inner)" opacity="0.9"/>
+  <circle cx="256" cy="280" r="55" stroke="#f0c040" stroke-width="4" fill="none"/>
+  <!-- Strategy symbol -->
+  <path d="M238 260 L256 240 L274 260" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="256" y1="240" x2="256" y2="292" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M236 292 Q246 312 256 312 Q266 312 276 292" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Connection lines -->
+  <line x1="256" y1="225" x2="256" y2="90" stroke="#5ba0d0" stroke-width="2" opacity="0.5"/>
+  <line x1="306" y1="255" x2="420" y2="184" stroke="#5ba0d0" stroke-width="2" opacity="0.5"/>
+  <line x1="306" y1="305" x2="420" y2="376" stroke="#5ba0d0" stroke-width="2" opacity="0.5"/>
+  <line x1="256" y1="335" x2="256" y2="470" stroke="#5ba0d0" stroke-width="2" opacity="0.5"/>
+  <line x1="206" y1="305" x2="92" y2="376" stroke="#5ba0d0" stroke-width="2" opacity="0.5"/>
+  <line x1="206" y1="255" x2="92" y2="184" stroke="#5ba0d0" stroke-width="2" opacity="0.5"/>
+  <!-- STG text - on top, overlapping hexagon slightly -->
+  <text x="256" y="75" text-anchor="middle" fill="#ffffff" font-family="Arial,sans-serif" font-size="64" font-weight="900" letter-spacing="12">STG</text>
 </svg>
