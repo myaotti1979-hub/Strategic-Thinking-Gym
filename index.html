@@ -64,7 +64,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v50</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v51</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -203,7 +203,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v50</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v51</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -606,7 +606,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v50').then(cache=>{
+      caches.open('stgym-v51').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -760,6 +760,11 @@ async function generateQuestion(){
     +'- 設問文で戦略の方向性を示唆しないこと（「強みを活かし機会を捉える」等のヒントを問題文に書かない）\n'
     +'- 状況文に「○○を検討している」と書いた内容をそのまま正答にしない（状況文がヒントになる）\n'
     +'- 不正解3つのうち少なくとも1つは「一見正しそうだが致命的な見落としがある」レベルにすること\n'
+    +'■ 数値の整合性（必須）\n'
+    +'- 状況文に含む数字（売上・拠点数・従業員数・利益率・単価等）が相互に矛盾しないこと\n'
+    +'- 売上÷拠点数＝1拠点売上、売上÷従業員数＝1人あたり売上、等を概算し現実的か検算すること\n'
+    +'- その業界の一般的なコスト構造（人件費率・原材料費率・固定費率）を考慮し、提示した利益率が成立するか確認すること\n'
+    +'- 企業規模の表現（中小/中堅/大手）が売上・従業員数・拠点数と整合すること\n'
     +'■ 上級問題の構造設計（難易度が上級の場合は必須）\n'
     +'- 全選択肢に具体的な数値データ（率、額、期間等）を含めること\n'
     +'- 一見最良に見える選択肢に「短期では有効だが長期で崩壊する」等の構造的な罠を設定すること\n'
