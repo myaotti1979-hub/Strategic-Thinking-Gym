@@ -818,7 +818,7 @@ async function generateQuestion(){
     var q;
     try{q=JSON.parse(text);}catch(pe){throw new Error('JSON解析エラー。再生成してください: '+pe.message.substring(0,50));}
     
-    q.id=CASES.length>0?Math.max.apply(null,CASES.map(function(c){return c.id;}))+1:1;
+    var _allIds=CASES.map(function(c){return c.id;}).concat(GEMINI_CASES.map(function(c){return c.id;}));q.id=_allIds.length>0?Math.max.apply(null,_allIds)+1:1;
     q.difficulty=diff;
     q.framework=fw;
     
