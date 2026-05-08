@@ -28,21 +28,32 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v44</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v45</div>
 </div>
 <div id="app"></div>
-<script src="cases.js"></script>
+<script src="cases.js" defer></script>
 <script>
-// CASES loaded via <script src="cases.js">
-if(typeof CASES==='undefined'||!Array.isArray(CASES)){
-  document.addEventListener('DOMContentLoaded',function(){
-    document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#e8e4d9"><h2>問題データの読み込みに失敗しました</h2><p style="color:#a09d93;margin-top:12px">cases.jsが見つかりません。</p><button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;background:#5b8fb9;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">再読み込み</button></div>';
-    var sp=document.getElementById('splash');if(sp)sp.style.display='none';
-  });
-  var CASES=[];
-}
+// CASES is loaded via <script src="cases.js" defer>
+// Wait for it to be available before rendering
 let GEMINI_CASES = [];
-try{var gq=JSON.parse(localStorage.getItem('gemini_questions')||'[]');if(gq.length>0){GEMINI_CASES=gq;}}catch(e){}
+function waitForCases(){
+  if(typeof CASES!=='undefined'&&Array.isArray(CASES)&&CASES.length>0){
+    console.log('✓ '+CASES.length+'問読み込み完了');
+    try{var gq=JSON.parse(localStorage.getItem('gemini_questions')||'[]');if(gq.length>0){GEMINI_CASES=gq;}}catch(e){}
+    render();
+  }else{
+    // Wait a bit and retry, up to 15 seconds
+    if(!window._casesRetry)window._casesRetry=0;
+    window._casesRetry++;
+    if(window._casesRetry<60){
+      setTimeout(waitForCases,250);
+    }else{
+      document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center;color:#e8e4d9"><h2>問題データの読み込みに失敗</h2><p style="color:#a09d93;margin-top:12px">cases.jsが見つからないかネットワークエラーです。</p><button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;background:#5b8fb9;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">再読み込み</button></div>';
+      var sp=document.getElementById('splash');if(sp){sp.classList.add('hide');}
+    }
+  }
+}
+
 
 
 const FW_MKT=['PESTLE分析','5フォース分析','SWOT分析','クロスSWOT分析','アンゾフの成長マトリクス','STP分析','4P/4C分析'];
@@ -97,6 +108,7 @@ const COMP_IDS={
   '🔴 サイバーフィジカル農業社':[891,892,893,894,895,896,897,898,899,900]
 };
 let aFw='all',mode='individual',compTarget=null,total=5,quiz=[],idx=0,sel=null,rev=false,results={},screen='start';
+let questionSource='claude';
 let onlyUnanswered=false;
 window.aDiff='all';
 let answerHistory={};
@@ -155,7 +167,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v44</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v45</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -558,7 +570,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v44').then(cache=>{
+      caches.open('stgym-v45').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -1300,6 +1312,6 @@ if(isSyncEnabled()){pullFromCloud();}
 
 // Splash screen
 setTimeout(()=>{const s=document.getElementById('splash');if(s){s.classList.add('hide');setTimeout(()=>s.remove(),500);}},1800);
-render();
+waitForCases();
 
 </script></body></html>
