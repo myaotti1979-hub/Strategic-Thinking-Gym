@@ -64,7 +64,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v51</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v53</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -203,7 +203,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v51</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v53</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -295,6 +295,7 @@ return`<div class="ctn fade-in">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><input type="range" id="qnum" min="5" max="${Math.min(dfp.length,30)}" value="${Math.min(10,dfp.length)}" style="flex:1;accent-color:#d4a853"><span id="qval" style="color:#e8e4d9;font-size:16px;font-weight:700;min-width:32px;text-align:center">${Math.min(10,dfp.length)}</span><span style="color:#6b6860;font-size:12px">/ ${dfp.length}問</span></div>
 
   <button class="btn ${dfp.length>=1?'bg':'bo'}" id="startBtn">スタート（${dfp.length}問中${Math.min(10,dfp.length)}問）</button>
+  ${questionSource==='gemini'&&GEMINI_CASES.length>0?'<div style="margin-top:20px;padding-top:16px;border-top:1px solid #2a2a28"><div style="font-size:12px;font-weight:700;color:#a09d93;margin-bottom:8px">Gemini問題一覧</div>'+GEMINI_CASES.map(function(q){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a18"><div style="flex:1"><div style="font-size:11px;color:#e8e4d9">'+q.industry+' / '+q.framework+' / '+q.difficulty+'</div><div style="font-size:10px;color:#6b6860;margin-top:2px">'+(q.question||'').substring(0,30)+'...</div></div><button onclick="deleteGeminiQuestion('+q.id+')" style="background:none;border:none;color:#c4554e;font-size:18px;cursor:pointer;padding:4px 8px">✕</button></div>';}).join('')+'</div>':''}
   </div>`;
 }
 
@@ -606,7 +607,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v51').then(cache=>{
+      caches.open('stgym-v53').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -724,8 +725,8 @@ async function generateQuestion(){
   result.innerHTML='<div style="padding:16px"><div id="cqProgress" style="font-size:12px;color:#d4a853;line-height:2">⏳ Gemini に接続中...</div></div>';
   
   const _fwGuide={
-'PESTLE分析':'選択肢は「要因」を記述。戦略は書かない。例:脱炭素政策の加速×再エネ補助金の拡大',
-'5フォース分析':'選択肢は「脅威」や「競争構造」を記述。対抗策は書かない。',
+'PESTLE分析':'選択肢は全て外部環境の「要因」を記述。戦略や自社リソースとの適合は書かない。正答の選定基準は「その外部要因が事業継続・成長に与えるインパクトの大きさ」であり「自社技術との相性」ではない。解説では次のFW（SWOT等）に繋がる示唆を含めること。P/E/S/T/L/Eの各領域から選択肢を出すこと。',
+'5フォース分析':'選択肢は「脅威」や「競争構造の変化」を記述。対抗策や自社戦略は書かない。正答の選定基準は「脅威のインパクト×発生確率」であり「自社の対応力」ではない。5つの力（新規参入・代替品・買い手・売り手・業界内競争）から選択肢を出すこと。',
 'SWOT分析':'選択肢は「戦略の方向性」を記述。',
 'クロスSWOT分析':'SO/WO/ST/WTの戦略を記述するがSO:等の接頭辞は禁止。',
 'アンゾフの成長マトリクス':'市場浸透/新製品開発等の戦略を記述するが接頭辞は禁止。',
@@ -991,6 +992,14 @@ function onCatChange(sel){
   ind.innerHTML='<option value="">選択してください</option>';
   var cat=CQ_INDUSTRIES.find(function(x){return x.cat===sel.value;});
   if(cat){cat.items.forEach(function(it){var o=document.createElement('option');o.value=it;o.textContent=it;ind.appendChild(o);});}
+}
+
+
+function deleteGeminiQuestion(id){
+  if(!confirm('Gemini問題 ID:'+id+' を削除しますか？'))return;
+  GEMINI_CASES=GEMINI_CASES.filter(function(q){return q.id!==id;});
+  try{localStorage.setItem('gemini_questions',JSON.stringify(GEMINI_CASES));}catch(e){}
+  render();
 }
 
 function bindAll(){
