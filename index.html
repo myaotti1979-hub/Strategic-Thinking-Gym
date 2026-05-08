@@ -220,7 +220,7 @@ function rS(){
 }
 
 function rIndividualSetup(){
-  const indv=CASES.filter(c=>!c.industry.includes('総合'));
+  const _src=questionSource==='gemini'?GEMINI_CASES:CASES;const indv=_src.filter(c=>!c.industry?.includes('総合'));
   const fp=aFw==='all'?indv:indv.filter(c=>c.framework===aFw);
   const dfp=window.aDiff&&window.aDiff!=='all'?fp.filter(c=>c.difficulty===window.aDiff):fp;
   
@@ -1098,16 +1098,7 @@ function rSparringView(){
 
 // === PWA: Service Worker Registration ===
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{
-    reg.update();
-    reg.addEventListener('updatefound',()=>{
-      const nw=reg.installing;
-      nw.addEventListener('statechange',()=>{
-        if(nw.state==='activated'){window.location.reload();}
-      });
-    });
-  }).catch(e=>console.log('SW:',e));
-  navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
 }
 
 // === Cloud Sync (Firebase Realtime Database) ===
