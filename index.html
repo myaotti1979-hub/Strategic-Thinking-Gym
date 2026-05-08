@@ -22,13 +22,49 @@
 #splash .subtitle{color:#e8e4d9;font-size:22px;font-weight:900;letter-spacing:3px;margin-bottom:8px;opacity:0;animation:fadeUp 0.8s ease-out 0.5s forwards}
 #splash .tagline{color:#a09d93;font-size:12px;opacity:0;animation:fadeUp 0.8s ease-out 0.8s forwards}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Dashboard */
+.dash-card{background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px}
+.dash-title{font-size:16px;font-weight:800;color:#e8e4d9;text-align:center;margin-bottom:16px}
+.dash-sub{font-size:11px;color:#6b6860;text-align:center;margin-top:4px}
+.dash-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0}
+.dash-stat{text-align:center;padding:12px;background:#0f0f0e;border-radius:10px}
+.dash-stat-label{font-size:11px;color:#6b6860}
+.dash-stat-val{font-size:22px;font-weight:900;margin:4px 0}
+.dash-stat-sub{font-size:9px;color:#4a4840}
+/* Data management */
+.dm-section{background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px}
+.dm-title{font-size:13px;font-weight:700;color:#a09d93;margin-bottom:8px}
+.dm-desc{font-size:11px;color:#6b6860;margin-bottom:12px}
+/* Question creation */
+.cq-label{font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px}
+.cq-select{width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:13px;font-family:inherit;outline:none}
+.cq-select-sm{width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:11px;font-family:inherit;outline:none}
+.cq-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.cq-field{margin-bottom:14px}
+/* Quality check */
+.qc-pass{font-size:11px;color:#4a9e6e;padding:3px 0}
+.qc-fail{font-size:11px;color:#c4554e;padding:3px 0}
+/* Tab UI */
+.tab-wrap{display:flex;gap:0;margin-bottom:16px;background:#1a1a18;border-radius:10px;padding:3px}
+.tab-btn{flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.tab-active{background:#5b8fb9;color:#fff}
+.tab-inactive{background:transparent;color:#6b6860}
+/* Common */
+.section-title{font-size:16px;font-weight:800;color:#e8e4d9;text-align:center}
+.home-btn-dark{background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:10px;justify-content:center;padding:14px 20px}
+.home-btn-sm{background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:8px;justify-content:center;padding:12px 16px;font-size:13px}
+.preview-correct{padding:8px 10px;margin:4px 0;border-radius:6px;font-size:12px;background:#1a2a1a;border:1px solid #4a9e6e;color:#4a9e6e}
+.preview-wrong{padding:8px 10px;margin:4px 0;border-radius:6px;font-size:12px;background:#1a1a18;color:#a09d93}
+.error-box{background:#2a1a1a;border:1px solid #c4554e;border-radius:10px;padding:14px;color:#c4554e;font-size:12px}
+
 </style>
 </head>
 <body>
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v46</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v48</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -167,7 +203,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v46</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v48</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -209,10 +245,10 @@ function rS(){
     <div style="color:#7a776e;font-size:11px;line-height:2"><span style="color:#d4a853">■ マーケ:</span> PESTLE→5F→SWOT→CrossSWOT→アンゾフ→STP→4P/4C<br><span style="color:#6ec992">■ グロース:</span> グロースモデル→KPI設計→実行パターン</div>
   </div>
   <div style="margin-top:12px">
-    <button onclick="screen='dashboard';render()" class="btn" style="width:100%;background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:10px;justify-content:center;padding:14px 20px;margin-bottom:8px"><span style="font-size:18px">📊</span><div>ダッシュボード</div></button>
+    <button onclick="screen='dashboard';render()" class="btn home-btn-dark" style="width:100%;margin-bottom:8px"><span style="font-size:18px">📊</span><div>ダッシュボード</div></button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button onclick="screen='data_manage';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:8px;justify-content:center;padding:12px 16px;font-size:13px"><span>📦</span><div>データ管理</div></button>
-      <button onclick="screen='create_q';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;display:flex;align-items:center;gap:8px;justify-content:center;padding:12px 16px;font-size:13px"><span>✏️</span><div>問題作成</div></button>
+      <button onclick="screen='data_manage';render()" class="btn home-btn-sm"><span>📦</span><div>データ管理</div></button>
+      <button onclick="screen='create_q';render()" class="btn home-btn-sm"><span>✏️</span><div>問題作成</div></button>
     </div>
   </div>
   ${Object.keys(answerHistory).length>0?'<div style="text-align:center;margin-top:12px"><button onclick="if(confirm(\'回答履歴をリセットしますか？\'))clearHistory()" style="background:none;border:none;color:#6b6860;font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline">履歴リセット</button></div>':''}
@@ -227,8 +263,8 @@ function rIndividualSetup(){
   const _tabCl=questionSource==='claude'?'background:#5b8fb9;color:#fff':'background:transparent;color:#6b6860';
   const _tabGm=questionSource==='gemini'?'background:#5b8fb9;color:#fff':'background:transparent;color:#6b6860';
   const _tabHtml='<div style="display:flex;gap:0;margin-bottom:16px;background:#1a1a18;border-radius:10px;padding:3px">'
-    +'<button onclick="questionSource=\'claude\';render()" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;'+_tabCl+'">📘 Claude（'+CASES.length+'問）</button>'
-    +'<button onclick="questionSource=\'gemini\';render()" style="flex:1;padding:10px;border:none;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;'+_tabGm+'">🤖 Gemini（'+GEMINI_CASES.length+'問）</button></div>';
+    +'<button onclick="questionSource=\'claude\';render()" class="tab-btn '+(_tabCl.includes('#5b8fb9')?'tab-active':'tab-inactive')+'">📘 Claude（'+CASES.length+'問）</button>'
+    +'<button onclick="questionSource=\'gemini\';render()" class="tab-btn '+(_tabGm.includes('#5b8fb9')?'tab-active':'tab-inactive')+'">🤖 Gemini（'+GEMINI_CASES.length+'問）</button></div>';
 return`<div class="ctn fade-in">
   ${_tabHtml}
   
@@ -277,7 +313,7 @@ function rCompSetup(){
 function rD(){return Array.from({length:total}).map((_,i)=>{let c='dt';if(i===idx)c+=' ac';if(results[i]==='correct')c+=' ok';if(results[i]==='wrong')c+=' ng';return`<div class="${c}"></div>`;}).join('');}
 function rQ(){
   const c=quiz[idx],isR=rev,ok=results[idx]==='correct',isComp=c.industry.includes('総合');
-  let chatUI='';try{if(isR&&gemKey)chatUI=rChat(c,ok);}catch(e){console.log('chat render error:',e);}
+  let chatUI='';try{if(isR&&gemKey)chatUI=rChat(c,ok);}catch(e){console.log('壁打ち描画エラー:',e);}
   return`<div class="ctn fade-in">
   <div style="margin-bottom:12px">${rBackBtn('やめる')}</div>
   <div class="hdr"><div><div class="hl">Strategic Thinking Gym</div><div class="ht">ケースで鍛える事業戦略フレームワーク</div></div><div><div style="color:#6b6860;font-size:11px;font-weight:600;margin-bottom:6px;text-align:right">Q${idx+1} / ${total}</div><div class="pg">${rD()}</div></div></div>
@@ -570,7 +606,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v46').then(cache=>{
+      caches.open('stgym-v48').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -637,32 +673,32 @@ function rCreateQ(){
     +(!gemKey?'<div style="background:#2a1a1a;border:1px solid #c4554e;border-radius:10px;padding:14px;margin-bottom:16px;color:#c4554e;font-size:12px">⚠️ 設定画面でGemini APIキーを入力してください</div>':'')
     +'<div style="background:#0f0f0e;border-radius:12px;padding:16px">'
     +'<div style="margin-bottom:14px">'
-    +'<label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">業種カテゴリ</label>'
-    +'<select id="cqCat" onchange="onCatChange(this)" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:13px;font-family:inherit;outline:none">'
+    +'<label class="cq-label">業種カテゴリ</label>'
+    +'<select id="cqCat" onchange="onCatChange(this)" class="cq-select">'
     +'<option value="">選択してください</option>'
     +industries.map(function(g){return'<option value="'+g.cat+'">'+g.cat+'</option>';}).join('')
     +'</select></div>'
     +'<div style="margin-bottom:14px">'
-    +'<label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">業種</label>'
-    +'<select id="cqInd" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:13px;font-family:inherit;outline:none"><option value="">↑ カテゴリを選択</option></select></div>'
+    +'<label class="cq-label">業種</label>'
+    +'<select id="cqInd" class="cq-select"><option value="">↑ カテゴリを選択</option></select></div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
-    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">企業規模</label>'
-    +'<select id="cqScale" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:11px;font-family:inherit;outline:none">'
+    +'<div><label class="cq-label">企業規模</label>'
+    +'<select id="cqScale" class="cq-select-sm">'
     +scales.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('')
     +'</select></div>'
-    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">経営状況</label>'
-    +'<select id="cqSit" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:11px;font-family:inherit;outline:none">'
+    +'<div><label class="cq-label">経営状況</label>'
+    +'<select id="cqSit" class="cq-select-sm">'
     +situations.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('')
     +'</select></div></div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
-    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">フレームワーク</label>'
-    +'<select id="cqFw" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:12px;font-family:inherit;outline:none">'
+    +'<div><label class="cq-label">フレームワーク</label>'
+    +'<select id="cqFw" class="cq-select">'
     +fwOptions.map(function(fw){return'<option value="'+fw+'">'+fw+'</option>';}).join('')
     +'</select></div>'
-    +'<div><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">難易度</label>'
-    +'<select id="cqDiff" style="width:100%;background:#1a1a18;border:1px solid #2a2a28;border-radius:8px;padding:10px;color:#e8e4d9;font-size:12px;font-family:inherit;outline:none">'
+    +'<div><label class="cq-label">難易度</label>'
+    +'<select id="cqDiff" class="cq-select">'
     +'<option value="初級">🟢 初級</option><option value="中級">🟡 中級</option><option value="上級" selected>🔴 上級</option></select></div></div>'
-    +'<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:#a09d93;display:block;margin-bottom:6px">生成モデル</label>'
+    +'<div style="margin-bottom:14px"><label class="cq-label">生成モデル</label>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
     +'<button type="button" id="cqModel31" onclick="document.getElementById(\'cqModelVal\').value=\'pro31\';this.style.background=\'#5b8fb9\';this.style.color=\'#fff\';document.getElementById(\'cqModel25\').style.background=\'#1a1a18\';document.getElementById(\'cqModel25\').style.color=\'#6b6860\'" style="padding:10px;border:1px solid #2a2a28;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:#5b8fb9;color:#fff">◆ 3.1 Pro</button>'
     +'<button type="button" id="cqModel25" onclick="document.getElementById(\'cqModelVal\').value=\'pro25\';this.style.background=\'#5b8fb9\';this.style.color=\'#fff\';document.getElementById(\'cqModel31\').style.background=\'#1a1a18\';document.getElementById(\'cqModel31\').style.color=\'#6b6860\'" style="padding:10px;border:1px solid #2a2a28;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:#1a1a18;color:#6b6860">💎 2.5 Pro</button>'
@@ -715,6 +751,13 @@ async function generateQuestion(){
     +'■ explanation: bestAnswerが最適な理由＋他3つがなぜ不適切かを説明\n'
     +'■ 難易度: '+_diffGuide+'\n'
     +'■ bestAnswer: a/b/c/dからランダムに選ぶ\n\n'
+    +'■ 戦略の実現可能性（最重要）\n'
+    +'- 正答は企業の経営状況（資金力・人材・ノウハウ）で実現可能なものにすること\n'
+    +'- 赤字企業に大規模投資を要する戦略を正答にしない\n'
+    +'- 「強みを新市場に転用」は具体的な根拠（既存チャネル、技術的優位性の具体的裏付け）がなければ正答にしない\n'
+    +'- 安直なSO戦略（強み×機会に飛びつくだけ）を正答にしない。実行面のハードル（資金、人材、時間）を考慮すること\n'
+    +'- 不正解の選択肢にも一定の合理性を持たせ、正答が「消去法でしか選べない」レベルにすること\n'
+    +'- 設問文で戦略の方向性を示唆しないこと（「強みを活かし機会を捉える」等のヒントを問題文に書かない）\n\n'
     +'以下のJSONのみ出力。JSON以外は一切出力しないこと。\n'
     +'{"industry":"業種名","situation":"状況文","question":"設問文","options":[{"id":"a","label":"選択肢A","description":"詳細A"},{"id":"b","label":"選択肢B","description":"詳細B"},{"id":"c","label":"選択肢C","description":"詳細C"},{"id":"d","label":"選択肢D","description":"詳細D"}],"bestAnswer":"正答id","explanation":"解説文","keyFramework":"FW適用ポイント","realExample":"実在企業の類似事例"}';
 
@@ -786,6 +829,10 @@ async function generateQuestion(){
         if(o.label.length<8) qcErrors.push(o.id.toUpperCase()+' 短すぎ('+o.label.length+'文字)');
         if(!o.description||o.description.length<5) qcErrors.push(o.id.toUpperCase()+' description不足');
       });
+      // 設問文がSO/WO等の方向性を示唆していないか
+      if(q.question&&(q.question.indexOf('強みを活かし')>=0||q.question.indexOf('機会を捉え')>=0||q.question.indexOf('弱みを克服')>=0)) qcErrors.push('設問文が戦略の方向性を示唆している');
+      // 解説が短すぎないか
+      if(q.explanation&&q.explanation.length<100) qcErrors.push('解説が短すぎます（'+q.explanation.length+'文字）');
     }
     
     var checkHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
@@ -923,6 +970,8 @@ function onCatChange(sel){
 }
 
 function bindAll(){
+  // Mobile: ensure all interactive elements respond to touch
+  document.querySelectorAll('button,select,input[type=range]').forEach(function(el){el.style.touchAction='manipulation';});
   document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;compTarget=null;render();});
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{aFw=b.dataset.f;render();});
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{compTarget=b.dataset.c;render();});
