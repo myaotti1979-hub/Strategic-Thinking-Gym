@@ -64,7 +64,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v48</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v49</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -203,7 +203,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v48</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v49</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -606,7 +606,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v48').then(cache=>{
+      caches.open('stgym-v49').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -730,7 +730,7 @@ async function generateQuestion(){
 'クロスSWOT分析':'SO/WO/ST/WTの戦略を記述するがSO:等の接頭辞は禁止。',
 'アンゾフの成長マトリクス':'市場浸透/新製品開発等の戦略を記述するが接頭辞は禁止。',
 'STP分析':'ターゲットセグメントとポジショニングの組合せを記述。',
-'4P/4C分析':'Product/Price/Place/Promotionの施策を記述するが接頭辞は禁止。',
+'4P/4C分析':'各選択肢が異なるP（Product/Price/Place/Promotion）の組合せを提案すること。全選択肢がProductだけにならないように。',
 'グロースモデル選択':'PLG/SLG等のモデル名の接頭辞は禁止。中身を平易に記述。',
 'KPI設計':'選択肢はKPI指標を記述。戦略文は書かない。',
 '実行戦略パターン':'具体的な実行施策を記述。'
@@ -757,7 +757,9 @@ async function generateQuestion(){
     +'- 「強みを新市場に転用」は具体的な根拠（既存チャネル、技術的優位性の具体的裏付け）がなければ正答にしない\n'
     +'- 安直なSO戦略（強み×機会に飛びつくだけ）を正答にしない。実行面のハードル（資金、人材、時間）を考慮すること\n'
     +'- 不正解の選択肢にも一定の合理性を持たせ、正答が「消去法でしか選べない」レベルにすること\n'
-    +'- 設問文で戦略の方向性を示唆しないこと（「強みを活かし機会を捉える」等のヒントを問題文に書かない）\n\n'
+    +'- 設問文で戦略の方向性を示唆しないこと（「強みを活かし機会を捉える」等のヒントを問題文に書かない）\n'
+    +'- 状況文に「○○を検討している」と書いた内容をそのまま正答にしない（状況文がヒントになる）\n'
+    +'- 不正解3つのうち少なくとも1つは「一見正しそうだが致命的な見落としがある」レベルにすること\n\n'
     +'以下のJSONのみ出力。JSON以外は一切出力しないこと。\n'
     +'{"industry":"業種名","situation":"状況文","question":"設問文","options":[{"id":"a","label":"選択肢A","description":"詳細A"},{"id":"b","label":"選択肢B","description":"詳細B"},{"id":"c","label":"選択肢C","description":"詳細C"},{"id":"d","label":"選択肢D","description":"詳細D"}],"bestAnswer":"正答id","explanation":"解説文","keyFramework":"FW適用ポイント","realExample":"実在企業の類似事例"}';
 
@@ -831,6 +833,16 @@ async function generateQuestion(){
       });
       // 設問文がSO/WO等の方向性を示唆していないか
       if(q.question&&(q.question.indexOf('強みを活かし')>=0||q.question.indexOf('機会を捉え')>=0||q.question.indexOf('弱みを克服')>=0)) qcErrors.push('設問文が戦略の方向性を示唆している');
+      // 状況文が正答をヒントしていないか
+      if(q.situation&&q.bestAnswer){
+        var bestOpt=q.options.find(function(o){return o.id===q.bestAnswer;});
+        if(bestOpt){
+          var keywords=bestOpt.label.match(/[\u4e00-\u9faf]{3,}/g)||[];
+          var hintCount=0;
+          keywords.forEach(function(kw){if(q.situation.indexOf(kw)>=0)hintCount++;});
+          if(hintCount>=2) qcErrors.push('状況文に正答のキーワードが'+hintCount+'個含まれている（ヒントになる）');
+        }
+      }
       // 解説が短すぎないか
       if(q.explanation&&q.explanation.length<100) qcErrors.push('解説が短すぎます（'+q.explanation.length+'文字）');
     }
