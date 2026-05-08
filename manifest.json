@@ -1,11 +1,11 @@
 {
   "name": "Strategic Thinking Gym",
   "short_name": "STGym",
-  "description": "ケースで鍛える事業戦略フレームワーク - 952問のケーススタディ練習アプリ",
+  "description": "ケースで鍛える事業戦略フレームワーク - 1000問のケーススタディ練習アプリ",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "theme_color": "#1a1a2e",
   "orientation": "portrait",
   "icons": [
     { "src": "icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
