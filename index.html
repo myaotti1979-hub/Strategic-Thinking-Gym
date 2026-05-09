@@ -576,10 +576,6 @@ function rDashboard(){
     <text x="${cx}" y="${cy+12}" text-anchor="middle" fill="#6b6860" font-size="9">総合正答率</text>
   </svg>`;
   
-  // FW detail table
-  const fwRows=fwStats.map(fw=>{
-    const bar=fw.rate!==null?`<div style="background:#1a1a18;border-radius:4px;height:8px;width:100%"><div style="background:${fw.rate>=70?'#4a9e6e':fw.rate>=40?'#d4a853':'#c4554e'};width:${fw.rate}%;height:100%;border-radius:4px"></div></div>`:'<div style="color:#4a4840;font-size:10px">未回答</div>';
-    
   // 直近50問の評価（30問以上回答後）
   const allAnsweredIds=Object.keys(answerHistory);
   const totalAnsweredCount=allAnsweredIds.length;
@@ -600,7 +596,11 @@ function rDashboard(){
       +'<div style="font-size:12px;color:#a09d93">直近'+recent50.length+'問: '+recentCorrect+'/'+recent50.length+'正解（'+recentPct+'%）</div>'
       +'</div>';
   }
-return`<div style="display:grid;grid-template-columns:70px 1fr 45px;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1a1a18">
+
+  // FW detail table
+  const fwRows=fwStats.map(fw=>{
+    const bar=fw.rate!==null?`<div style="background:#1a1a18;border-radius:4px;height:8px;width:100%"><div style="background:${fw.rate>=70?'#4a9e6e':fw.rate>=40?'#d4a853':'#c4554e'};width:${fw.rate}%;height:100%;border-radius:4px"></div></div>`:'<div style="color:#4a4840;font-size:10px">未回答</div>';
+    return`<div style="display:grid;grid-template-columns:70px 1fr 45px;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1a1a18">
       <div style="font-size:11px;font-weight:600;color:#a09d93">${fw.name}</div>
       ${bar}
       <div style="font-size:12px;font-weight:700;color:${fw.rate!==null?(fw.rate>=70?'#4a9e6e':fw.rate>=40?'#d4a853':'#c4554e'):'#4a4840'};text-align:right">${fw.rate!==null?fw.rate+'%':'-'}</div>
