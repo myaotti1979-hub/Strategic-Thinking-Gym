@@ -64,7 +64,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v57</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v59</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -203,7 +203,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v57</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v59</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -379,7 +379,7 @@ function rSet(){
 
 function rSc(){
   const cor=Object.values(results).filter(r=>r==='correct').length,pct=Math.round(cor/total*100);
-  let g;if(pct>=80)g={l:'戦略家',c:'#d4a853',e:'👑'};else if(pct>=60)g={l:'マネージャー',c:'#6ec992',e:'📈'};else if(pct>=40)g={l:'アナリスト',c:'#7aabdb',e:'🔍'};else g={l:'インターン',c:'#e07a73',e:'📚'};
+  let g;if(pct>=80)g={l:'ストラテジスト',c:'#d4a853',e:'👑'};else if(pct>=60)g={l:'マネージャー',c:'#6ec992',e:'🎖️'};else if(pct>=40)g={l:'リーダー',c:'#7aabdb',e:'⭐'};else g={l:'インターン',c:'#e07a73',e:'📚'};
   return`<div class="sb fade-in"><div style="font-size:56px;margin-bottom:12px">${g.e}</div><div style="color:${g.c};font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">Your Grade</div><div style="font-size:36px;font-weight:900;margin-bottom:8px">${g.l}</div><div style="color:#6b6860;font-size:15px;margin-bottom:32px">${cor}/${total} 正解（${pct}%）</div>
   <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px;margin-bottom:32px">${quiz.map((c,i)=>{const o=results[i]==='correct';return`<div class="si ${o?'sc':'sw'}"><span style="font-size:16px;font-weight:800;width:24px;color:${o?'#6ec992':'#e07a73'}">${o?'✓':'✗'}</span><div style="flex:1;text-align:left"><div style="color:#c0bdb4;font-size:13px;font-weight:600">Q${i+1}. ${c.industry.replace(/（総合[①-⑮]）/,'')}</div><div style="color:#6b6860;font-size:11px">${c.framework}</div></div></div>`;}).join('')}</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><button class="btn bg" id="retry" style="width:auto;padding:14px 36px">もう一度挑戦する</button><button class="btn" id="goHomeBtn" style="width:auto;padding:14px 36px;background:#2a2a28;color:#a09d93">ホームに戻る</button></div></div>`;
@@ -518,7 +518,28 @@ function rDashboard(){
   // FW detail table
   const fwRows=fwStats.map(fw=>{
     const bar=fw.rate!==null?`<div style="background:#1a1a18;border-radius:4px;height:8px;width:100%"><div style="background:${fw.rate>=70?'#4a9e6e':fw.rate>=40?'#d4a853':'#c4554e'};width:${fw.rate}%;height:100%;border-radius:4px"></div></div>`:'<div style="color:#4a4840;font-size:10px">未回答</div>';
-    return`<div style="display:grid;grid-template-columns:70px 1fr 45px;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1a1a18">
+    
+  // 直近50問の評価（30問以上回答後）
+  const allAnsweredIds=Object.keys(answerHistory);
+  const totalAnsweredCount=allAnsweredIds.length;
+  let gradeHtml='';
+  if(totalAnsweredCount>=30){
+    const recent50=allAnsweredIds.slice(-50);
+    const recentCorrect=recent50.filter(function(id){return answerHistory[id]==='correct';}).length;
+    const recentPct=Math.round(recentCorrect/recent50.length*100);
+    let g;
+    if(recentPct>=80)g={l:'ストラテジスト',c:'#d4a853',e:'👑',desc:'上級者。多角的な分析力と実行可能な戦略立案ができる'};
+    else if(recentPct>=60)g={l:'マネージャー',c:'#6ec992',e:'🎖️',desc:'中級者。基本的なフレームワーク適用ができる'};
+    else if(recentPct>=40)g={l:'リーダー',c:'#7aabdb',e:'⭐',desc:'分析の基礎を習得中。実践経験を積もう'};
+    else g={l:'インターン',c:'#e07a73',e:'📚',desc:'学習中。まずは初級問題から取り組もう'};
+    gradeHtml='<div style="text-align:center;margin-bottom:20px;padding:20px;background:#0f0f0e;border-radius:12px">'
+      +'<div style="font-size:48px;margin-bottom:8px">'+g.e+'</div>'
+      +'<div style="font-size:24px;font-weight:900;color:'+g.c+';margin-bottom:4px">'+g.l+'</div>'
+      +'<div style="font-size:11px;color:#6b6860;margin-bottom:8px">'+g.desc+'</div>'
+      +'<div style="font-size:12px;color:#a09d93">直近'+recent50.length+'問: '+recentCorrect+'/'+recent50.length+'正解（'+recentPct+'%）</div>'
+      +'</div>';
+  }
+return`<div style="display:grid;grid-template-columns:70px 1fr 45px;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #1a1a18">
       <div style="font-size:11px;font-weight:600;color:#a09d93">${fw.name}</div>
       ${bar}
       <div style="font-size:12px;font-weight:700;color:${fw.rate!==null?(fw.rate>=70?'#4a9e6e':fw.rate>=40?'#d4a853':'#c4554e'):'#4a4840'};text-align:right">${fw.rate!==null?fw.rate+'%':'-'}</div>
@@ -537,6 +558,7 @@ function rDashboard(){
   
   return`<div class="ctn fade-in">
     ${rBackBtn()}
+    \${gradeHtml}
     <div style="text-align:center;margin-bottom:16px">
       <div style="font-size:16px;font-weight:800;color:#e8e4d9">📊 ダッシュボード</div>
       <div style="font-size:11px;color:#6b6860;margin-top:4px">${totalAnswered}問回答 / ${CASES.length}問</div>
@@ -607,7 +629,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v57').then(cache=>{
+      caches.open('stgym-v59').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
