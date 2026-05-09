@@ -365,8 +365,10 @@ function rSet(){
       <div style="display:flex;justify-content:space-between;color:#8b8880;font-size:12px;margin-bottom:6px"><span>今月の累計API使用料</span><span style="color:#d4a853;font-weight:700">¥${monthlyCost.toFixed(1)}</span></div>
       <button onclick="if(confirm('今月の累計をリセットしますか？')){monthlyCost=0;try{localStorage.setItem('monthly_cost_'+new Date().toISOString().slice(0,7),'0');}catch(e){}render();}" style="background:none;border:none;color:#6b6860;font-size:10px;cursor:pointer;font-family:inherit;text-decoration:underline">リセット</button>
     </div>
-    <div class="sl2">Gemini API Key</div>
-    <input type="password" id="gemKeyInput" value="${gemKey}" placeholder="AIza..." style="width:100%;background:#0f0f0e;border:1px solid #2a2a28;border-radius:8px;padding:12px;color:#e8e4d9;font-size:14px;font-family:monospace;margin:8px 0 16px;box-sizing:border-box;outline:none">
+    <div class="sl2">Gemini API Key（有料：Pro用）</div>
+    <input type="password" id="gemKeyInput" value="${gemKey}" placeholder="AIza...（3.1 Pro / 2.5 Pro 用）" style="width:100%;background:#0f0f0e;border:1px solid #2a2a28;border-radius:8px;padding:12px;color:#e8e4d9;font-size:14px;font-family:monospace;margin:8px 0 8px;box-sizing:border-box;outline:none">
+    <div style="font-size:11px;color:#a09d93;margin-bottom:6px">Gemini API Key（無料：Flash用）</div>
+    <input type="password" id="gemKeyFreeInput" value="${gemKeyFree}" placeholder="AIza...（Flash用、未設定なら上のキーを使用）" style="width:100%;background:#0f0f0e;border:1px solid #2a2a28;border-radius:8px;padding:12px;color:#e8e4d9;font-size:14px;font-family:monospace;margin:8px 0 16px;box-sizing:border-box;outline:none">
     <button class="btn bg" id="saveKey">保存する</button>
     <div style="color:#6b6860;font-size:12px;margin-top:12px;line-height:1.8">
       ・APIキーは端末のlocalStorageに保存されます<br>
@@ -1287,7 +1289,7 @@ function bindAll(){
   const r=document.getElementById('retry');if(r)r.onclick=()=>{screen='start';render();};
   const hb=document.getElementById('goHomeBtn');if(hb)hb.onclick=goHome;
   document.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>{gemModel=b.dataset.model;try{localStorage.setItem('gemini_model',gemModel);}catch(e){}render();});
-  const sk=document.getElementById('saveKey');if(sk)sk.onclick=()=>{const v=document.getElementById('gemKeyInput').value.trim();gemKey=v;try{localStorage.setItem('gemini_key',v);}catch(e){}screen='start';render();};
+  const sk=document.getElementById('saveKey');if(sk)sk.onclick=()=>{const v=document.getElementById('gemKeyInput').value.trim();const vf=(document.getElementById('gemKeyFreeInput')||{}).value?.trim()||'';gemKey=v;gemKeyFree=vf;try{localStorage.setItem('gemini_key',v);localStorage.setItem('gemini_key_free',vf);}catch(e){}screen='start';render();};
 }
 
 // === 壁打ちセッション保存 ===
