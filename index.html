@@ -64,7 +64,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v53</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v55</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -203,7 +203,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v53</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v55</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -329,7 +329,7 @@ function rChat(c,ok){
   const chatModel=isBasic?'flash':gemModel;
   return`<div style="margin:20px 0">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <button class="btn" id="chatStart" style="background:#2a2510;color:#d4a853;border:1px solid #3a3520;font-size:13px;padding:12px;flex:1">💬 壁打ちする</button>
+        <button class="btn" id="chatStart" onclick="sessionCost=0;chatHist.push({role:'model',content:'このケースについて壁打ちしましょう。正解の戦略について疑問に思うこと、別の条件だったらどうなるか、もっと深く知りたい点など、何でも聞いてください。'});render();" style="background:#2a2510;color:#d4a853;border:1px solid #3a3520;font-size:13px;padding:12px;flex:1">💬 壁打ちする</button>
       </div>
       ${isBasic?'<div style="color:#6b6860;font-size:10px;text-align:center;margin-bottom:4px">初級は ⚡ Flash 固定（≈¥0.7/ターン）</div>':''}
       <div style="display:flex;align-items:center;gap:8px;justify-content:center">
@@ -607,7 +607,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v53').then(cache=>{
+      caches.open('stgym-v55').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -773,6 +773,11 @@ async function generateQuestion(){
     +'- 消去法では解けない設計にすること（全選択肢にもっともらしいデータ裏付けをつける）\n'
     +'- KPI問題では先行指標vs遅行指標、短期vs長期、相関vs因果の区別が問われる設計にすること\n'
     +'- 解説では「なぜ一見良さそうな選択肢が不適切か」を因果関係で説明すること\n\n'
+    +'■ 自己反論テスト（生成後に内部で実行）\n'
+    +'- 問題を作成した後、各不正解に対し「この選択肢が実は正答より優れている」という反論を試みること\n'
+    +'- 反論が成立する場合、状況文・解説・選択肢を修正して反論が成立しないようにすること\n'
+    +'- 特にOEM/受託の原材料費負担、市場規模と参入可能性、資金制約と投資規模の整合を検証すること\n'
+    +'- 全不正解に対して反論が成立しないことを確認してから出力すること\n\n'
     +'以下のJSONのみ出力。JSON以外は一切出力しないこと。\n'
     +'{"industry":"業種名","situation":"状況文","question":"設問文","options":[{"id":"a","label":"選択肢A","description":"詳細A"},{"id":"b","label":"選択肢B","description":"詳細B"},{"id":"c","label":"選択肢C","description":"詳細C"},{"id":"d","label":"選択肢D","description":"詳細D"}],"bestAnswer":"正答id","explanation":"解説文","keyFramework":"FW適用ポイント","realExample":"実在企業の類似事例"}';
 
@@ -869,6 +874,14 @@ async function generateQuestion(){
     }
     checkHtml+='</div>';
     
+    // STEP 3: 反論テスト（構造チェック合格時のみ）
+    var advResult={pass:true,html:''};
+    if(qcErrors.length===0){
+      advResult=await runAdversarialReview(q);
+      checkHtml=checkHtml.replace('</div>','')+'</div>'+advResult.html;
+      if(!advResult.pass)qcErrors.push('反論テスト不合格');
+    }
+    
     var previewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#4a9e6e;margin-bottom:10px">✓ 問題プレビュー</div>'
       +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+q.industry+' / '+q.framework+' / '+q.difficulty+'</div>'
@@ -878,6 +891,11 @@ async function generateQuestion(){
         +o.id.toUpperCase()+': '+o.label+(o.id===q.bestAnswer?' ✓':'')+'</div>';}).join('')
       +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5">'+(q.explanation||'').substring(0,200)+'...</div></div>';
     
+    var adversarialHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">⚔️ 反論テスト</div>'
+      +'<div style="font-size:10px;color:#6b6860;margin-bottom:8px">不正解が実は正答より優れていないか検証します</div>'
+      +'<button onclick="runAdversarialReview()" class="btn" style="background:#3a3a38;color:#e8e4d9;padding:10px;font-size:12px">🔍 反論テストを実行</button>'
+      +'<div id="adversarialResult" style="margin-top:8px"></div></div>';
     var aiReviewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">🤖 AI品質レビュー</div>'
       +'<button onclick="runAiReview()" class="btn" style="background:#3a3a38;color:#e8e4d9;padding:10px;font-size:12px">◆ 3.1 Pro でレビュー実行</button>'
@@ -887,7 +905,7 @@ async function generateQuestion(){
       +(qcErrors.length===0?'<button onclick="addGeneratedQuestion()" class="btn" style="background:#4a9e6e;color:#fff;padding:12px;font-size:13px">✓ 追加する</button>':'<button disabled class="btn" style="background:#2a2a28;color:#4a4840;padding:12px;font-size:13px">❌ エラーあり</button>')
       +'<button onclick="screen=\'create_q\';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;padding:12px;font-size:13px">✗ やり直す</button></div>';
     
-    result.innerHTML=checkHtml+previewHtml+aiReviewHtml+actHtml;
+    result.innerHTML=checkHtml+previewHtml+adversarialHtml+aiReviewHtml+actHtml;
     window._pendingQuestion=q;
     
   }catch(err){
@@ -1000,6 +1018,248 @@ function deleteGeminiQuestion(id){
   GEMINI_CASES=GEMINI_CASES.filter(function(q){return q.id!==id;});
   try{localStorage.setItem('gemini_questions',JSON.stringify(GEMINI_CASES));}catch(e){}
   render();
+}
+
+
+async function runAdversarialReview(q){
+  var sec=document.getElementById('cqProgress');
+  if(sec)sec.innerHTML='<div style="color:#d4a853;font-size:12px">🔍 反論テスト実行中...</div>';
+  
+  var modelKey=document.getElementById('cqModelVal')?.value||'pro31';
+  var model=(MODEL_INFO[modelKey]||MODEL_INFO.pro31).api;
+  
+  var prompt='あなたは事業戦略の専門家であり、問題の品質審査員です。\n\n'
+    +'以下の4択問題で、正答は'+q.bestAnswer.toUpperCase()+'とされています。\n'
+    +'不正解の3つの選択肢それぞれについて「実はこの選択肢が正答ではないか？」と反論を試みてください。\n\n'
+    +'【問題】\n'+JSON.stringify({situation:q.situation,question:q.question,options:q.options.map(function(o){return{id:o.id,label:o.label};}),bestAnswer:q.bestAnswer,explanation:q.explanation})+'\n\n'
+    +'以下のJSON形式で回答してください。JSON以外は一切出力しないでください。\n'
+    +'{\n'
+    +'"reviews": [\n'
+    +'  {"id":"不正解の選択肢id", "counterArgument":"この選択肢が正答である可能性を論じる反論", "convincing": true/false}\n'
+    +'],\n'
+    +'"overallPass": true/false,  // 全ての反論が説得力なし(false)ならtrue\n'
+    +'"summary": "総合判定コメント"\n'
+    +'}\n\n'
+    +'判定基準:\n'
+    +'- convincing=true: 現実の経営判断として、その選択肢が正答より優れている合理的根拠がある\n'
+    +'- convincing=false: 反論は可能だが、正答の方が明らかに優れている\n'
+    +'- overallPass=true: 全てのconvincingがfalse（正答が揺るがない）\n'
+    +'- overallPass=false: 1つでもconvincing=trueがある（問題の品質に疑問）\n'
+    +'- OEMや受託の場合は原材料費負担の主体、工場稼働率への影響も考慮すること\n'
+    +'- 赤字企業の場合は資金制約、投資回収期間も考慮すること';
+
+  try{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+gemKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.3}})
+    });
+    var data=await res.json();
+    if(!data.candidates||!data.candidates[0])return{pass:false,html:'<div style="color:#c4554e;font-size:11px">⚠️ 反論テストAPI失敗</div>'};
+    
+    var text=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');
+    text=text.replace(/```json|```/g,'').trim();
+    var review=JSON.parse(text);
+    
+    var rhtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">';
+    rhtml+='<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:10px">🔍 反論テスト</div>';
+    
+    review.reviews.forEach(function(r){
+      var icon=r.convincing?'❌':'✅';
+      var color=r.convincing?'#c4554e':'#4a9e6e';
+      rhtml+='<div style="margin-bottom:8px;padding:8px;background:#1a1a18;border-radius:6px">';
+      rhtml+='<div style="font-size:12px;font-weight:700;color:'+color+'">'+icon+' '+r.id.toUpperCase()+'への反論</div>';
+      rhtml+='<div style="font-size:11px;color:#a09d93;margin-top:4px;line-height:1.5">'+r.counterArgument+'</div>';
+      rhtml+='<div style="font-size:10px;color:'+color+';margin-top:4px">'+(r.convincing?'→ 説得力あり（正答が揺らぐ）':'→ 説得力不足（正答は妥当）')+'</div>';
+      rhtml+='</div>';
+    });
+    
+    var passColor=review.overallPass?'#4a9e6e':'#c4554e';
+    var passIcon=review.overallPass?'✅':'❌';
+    rhtml+='<div style="margin-top:8px;font-size:12px;font-weight:700;color:'+passColor+'">'+passIcon+' '+(review.overallPass?'反論テスト合格：正答は揺るがない':'反論テスト不合格：正答に疑問あり')+'</div>';
+    rhtml+='<div style="font-size:11px;color:#6b6860;margin-top:4px">'+review.summary+'</div>';
+    rhtml+='</div>';
+    
+    return{pass:review.overallPass,html:rhtml};
+  }catch(err){
+    return{pass:false,html:'<div style="background:#2a1a1a;border-radius:10px;padding:14px;color:#c4554e;font-size:12px">⚠️ 反論テストエラー: '+err.message+'</div>'};
+  }
+}
+
+
+async function runAdversarialReview(){
+  var q=window._pendingQuestion;
+  if(!q||!gemKey)return;
+  var sec=document.getElementById('adversarialResult');
+  if(!sec)return;
+  sec.innerHTML='<div style="color:#d4a853;font-size:11px">🔍 反論テスト実行中...</div>';
+  
+  var modelKey=document.getElementById('cqModelVal')?.value||'pro31';
+  var wrongOpts=q.options.filter(function(o){return o.id!==q.bestAnswer;});
+  var correctOpt=q.options.find(function(o){return o.id===q.bestAnswer;});
+  
+  var prompt='あなたは事業戦略の専門家であり、問題品質の検証者です。\n\n'
+    +'以下の4択問題で、正答は'+q.bestAnswer.toUpperCase()+'「'+correctOpt.label+'」とされています。\n\n'
+    +'【状況】'+q.situation+'\n'
+    +'【設問】'+q.question+'\n'
+    +'【選択肢】\n'
+    +q.options.map(function(o){return o.id.toUpperCase()+': '+o.label+(o.id===q.bestAnswer?' (正答)':'');}).join('\n')+'\n\n'
+    +'以下の不正解について、それぞれ「実はこの選択肢の方が正答より優れている」という反論を試みてください。\n\n'
+    +wrongOpts.map(function(o){return o.id.toUpperCase()+': '+o.label;}).join('\n')+'\n\n'
+    +'JSON形式で回答してください。JSON以外は一切出力しないでください。\n'
+    +'{"reviews":[\n'
+    +wrongOpts.map(function(o){
+      return '  {"id":"'+o.id+'","label":"'+o.label.substring(0,20)+'...","counterArgument":"この選択肢が正答より優れている理由","isValid":true/false,"reason":"反論が成立する/しない理由"}';
+    }).join(',\n')+'\n'
+    +'],"overallPass":true/false,"summary":"総合判定コメント"}';
+
+  try{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[modelKey]||MODEL_INFO.pro31).api+':generateContent?key='+gemKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.2}})
+    });
+    var data=await res.json();
+    if(!data.candidates||!data.candidates[0])throw new Error(data.error?.message||'応答なし');
+    
+    var text=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');
+    text=text.replace(/```json|```/g,'').trim();
+    if(!text.endsWith('}'))text=text.substring(0,text.lastIndexOf('}')+1);
+    var review=JSON.parse(text);
+    
+    var rhtml='<div style="margin-top:8px">';
+    var hasFail=false;
+    if(review.reviews){
+      review.reviews.forEach(function(r){
+        var valid=r.isValid;
+        if(valid)hasFail=true;
+        rhtml+='<div style="font-size:11px;padding:6px 0;border-bottom:1px solid #1a1a18">'
+          +'<div style="color:'+(valid?'#c4554e':'#4a9e6e')+';font-weight:700">'+(valid?'❌ '+r.id.toUpperCase()+': 反論が成立':'✅ '+r.id.toUpperCase()+': 反論不成立')+'</div>'
+          +'<div style="color:#8b8880;font-size:10px;margin-top:3px">'+r.counterArgument+'</div>'
+          +'<div style="color:#6b6860;font-size:10px;margin-top:2px">→ '+r.reason+'</div>'
+          +'</div>';
+      });
+    }
+    rhtml+='<div style="margin-top:8px;font-size:12px;font-weight:700;color:'+(hasFail?'#c4554e':'#4a9e6e')+'">'
+      +(hasFail?'❌ 反論テスト不合格 — 正答の優位性が不十分です':'✅ 反論テスト合格 — 正答の優位性が確認されました')+'</div>';
+    if(hasFail){
+      rhtml+='<button onclick="fixQuestionFromReview()" class="btn" style="background:#5b8fb9;color:#fff;padding:10px;font-size:12px;margin-top:8px">🔧 AIで修正して再チェック</button>';
+    }
+    if(review.summary){
+      rhtml+='<div style="font-size:10px;color:#8b8880;margin-top:4px">'+review.summary+'</div>';
+    }
+    
+    // If failed, disable the add button
+    if(hasFail){
+      var addBtn=document.querySelector('button[onclick*="addGeneratedQuestion"]');
+      if(addBtn){addBtn.disabled=true;addBtn.style.background='#2a2a28';addBtn.style.color='#4a4840';addBtn.textContent='❌ 反論テスト不合格';}
+    }
+    
+    rhtml+='</div>';
+    sec.innerHTML=rhtml;
+    
+  }catch(err){
+    sec.innerHTML='<div style="color:#c4554e;font-size:11px">⚠️ 反論テストエラー: '+err.message+'</div>';
+  }
+}
+
+
+async function fixQuestionFromReview(){
+  var q=window._pendingQuestion;
+  if(!q||!gemKey)return;
+  var sec=document.getElementById('adversarialResult');
+  var reviewText=sec?sec.innerText:'';
+  
+  var btn=document.querySelector('button[onclick*="fixQuestion"]');
+  if(btn){btn.disabled=true;btn.textContent='🔧 修正中...';}
+  
+  var modelKey=document.getElementById('cqModelVal')?.value||'pro31';
+  
+  var prompt='以下の4択問題は反論テストで不合格になりました。不合格の理由を踏まえ、問題を修正してください。\n\n'
+    +'【現在の問題】\n'+JSON.stringify(q,null,2)+'\n\n'
+    +'【反論テスト結果】\n'+reviewText+'\n\n'
+    +'【修正方針】\n'
+    +'- 正答の優位性が明確になるよう修正すること\n'
+    +'- 反論が成立した不正解について、その選択肢の致命的な欠点を状況文や解説に追加すること\n'
+    +'- 正答を変更しても構わない（反論が成立した選択肢を正答にしても良い）\n'
+    +'- 選択肢のlabel・description・解説を全て整合的に修正すること\n'
+    +'- 元の問題の業種・FW・難易度・状況設定は維持すること\n\n'
+    +'修正した問題をJSON形式で出力してください。JSON以外は一切出力しないでください。\n'
+    +'元のJSONと同じ形式で出力してください。';
+
+  try{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[modelKey]||MODEL_INFO.pro31).api+':generateContent?key='+gemKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.5}})
+    });
+    var data=await res.json();
+    if(!data.candidates||!data.candidates[0])throw new Error(data.error?.message||'応答なし');
+    
+    var text=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');
+    text=text.replace(/```json|```/g,'').trim();
+    if(!text.endsWith('}'))text=text.substring(0,text.lastIndexOf('}')+1);
+    var fixed=JSON.parse(text);
+    
+    // Preserve original metadata
+    fixed.id=q.id;
+    fixed.difficulty=q.difficulty;
+    fixed.framework=q.framework;
+    fixed.source='gemini';
+    
+    // Update pending question
+    window._pendingQuestion=fixed;
+    
+    // Re-run structural check and show preview
+    // Trigger the same display as after generation
+    var result=document.getElementById('cqResult');
+    
+    var qcErrors=[];
+    if(!fixed.options||fixed.options.length!==4) qcErrors.push('選択肢が4つありません');
+    if(!fixed.bestAnswer||['a','b','c','d'].indexOf(fixed.bestAnswer)<0) qcErrors.push('bestAnswerが不正');
+    if(!fixed.situation||fixed.situation.length<30) qcErrors.push('状況文が短すぎます');
+    if(!fixed.explanation||fixed.explanation.length<30) qcErrors.push('解説が短すぎます');
+    if(fixed.options&&fixed.options.length===4){
+      var bestL=fixed.options.find(function(o){return o.id===fixed.bestAnswer;});
+      var othL=fixed.options.filter(function(o){return o.id!==fixed.bestAnswer;});
+      if(bestL&&othL.length===3){
+        var bLen=bestL.label.length;var aOth=othL.reduce(function(s,o){return s+o.label.length;},0)/3;
+        if(aOth>0&&bLen/aOth>=2.0) qcErrors.push('正答labelが長すぎ');
+      }
+      fixed.options.forEach(function(o){
+        if(o.label.length<8) qcErrors.push(o.id.toUpperCase()+' 短すぎ');
+        if(!o.description||o.description.length<5) qcErrors.push(o.id.toUpperCase()+' description不足');
+      });
+      if(fixed.explanation&&fixed.explanation.length<100) qcErrors.push('解説が短すぎます');
+    }
+    
+    var checkHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:10px">📋 修正後の品質チェック</div>';
+    if(qcErrors.length>0){qcErrors.forEach(function(e){checkHtml+='<div style="font-size:11px;color:#c4554e;padding:3px 0">❌ '+e+'</div>';});}
+    else{checkHtml+='<div style="font-size:11px;color:#4a9e6e">✅ 全チェック合格</div>';}
+    checkHtml+='</div>';
+    
+    var previewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#5ba0d0;margin-bottom:10px">🔧 修正後プレビュー</div>'
+      +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+fixed.industry+' / '+fixed.framework+' / '+fixed.difficulty+'</div>'
+      +'<div style="font-size:13px;color:#e8e4d9;margin-bottom:10px;line-height:1.6">'+fixed.situation+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">'+fixed.question+'</div>'
+      +fixed.options.map(function(o){return'<div style="padding:8px 10px;margin:4px 0;border-radius:6px;font-size:12px;'+(o.id===fixed.bestAnswer?'background:#1a2a1a;border:1px solid #4a9e6e;color:#4a9e6e':'background:#1a1a18;color:#a09d93')+'">'
+        +o.id.toUpperCase()+': '+o.label+(o.id===fixed.bestAnswer?' ✓':'')+'</div>';}).join('')
+      +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5">'+(fixed.explanation||'')+'</div></div>';
+    
+    var adversarialHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">⚔️ 反論テスト</div>'
+      +'<button onclick="runAdversarialReview()" class="btn" style="background:#3a3a38;color:#e8e4d9;padding:10px;font-size:12px">🔍 再度テストを実行</button>'
+      +'<div id="adversarialResult" style="margin-top:8px"></div></div>';
+    
+    var actHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +(qcErrors.length===0?'<button onclick="addGeneratedQuestion()" class="btn" style="background:#4a9e6e;color:#fff;padding:12px;font-size:13px">✓ 追加する</button>':'<button disabled class="btn" style="background:#2a2a28;color:#4a4840;padding:12px;font-size:13px">❌ エラーあり</button>')
+      +'<button onclick="screen=\'create_q\';render()" class="btn" style="background:#2a2a28;color:#e8e4d9;padding:12px;font-size:13px">✗ やり直す</button></div>';
+    
+    result.innerHTML=checkHtml+previewHtml+adversarialHtml+actHtml;
+    
+  }catch(err){
+    if(btn){btn.disabled=false;btn.textContent='🔧 AIで修正';}
+    alert('修正エラー: '+err.message);
+  }
 }
 
 function bindAll(){
