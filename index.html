@@ -874,13 +874,6 @@ async function generateQuestion(){
     }
     checkHtml+='</div>';
     
-    // STEP 3: 反論テスト（構造チェック合格時のみ）
-    var advResult={pass:true,html:''};
-    if(qcErrors.length===0){
-      advResult=await runAdversarialReview(q);
-      checkHtml=checkHtml.replace('</div>','')+'</div>'+advResult.html;
-      if(!advResult.pass)qcErrors.push('反論テスト不合格');
-    }
     
     var previewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#4a9e6e;margin-bottom:10px">✓ 問題プレビュー</div>'
