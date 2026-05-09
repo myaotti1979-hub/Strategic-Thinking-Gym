@@ -64,7 +64,7 @@
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v59</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v61</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -160,6 +160,7 @@ try{gemModel=localStorage.getItem('gemini_model')||'flash';}catch(e){}
 try{monthlyCost=parseFloat(localStorage.getItem('monthly_cost_'+new Date().toISOString().slice(0,7))||'0');}catch(e){}
 const MODEL_INFO={
   flash:{name:'2.5 Flash',icon:'⚡',api:'gemini-2.5-flash',inCost:0.30,outCost:2.50,thinkMult:0,desc:'コスパ重視'},
+  flashlite:{name:'3.1 Flash-Lite',icon:'⚡',api:'gemini-3.1-flash-lite',inCost:0.25,outCost:1.50,thinkMult:0,desc:'最速・最安'},
   pro25:{name:'2.5 Pro',icon:'💎',api:'gemini-2.5-pro',inCost:1.25,outCost:10.00,thinkMult:2.5,desc:'バランス型'},
   pro31:{name:'3.1 Pro',icon:'◆',api:'gemini-3.1-pro-preview',inCost:2.00,outCost:12.00,thinkMult:3,desc:'最高品質'}
 };
@@ -203,7 +204,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v59</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v61</div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -387,7 +388,7 @@ function rSc(){
 
 async function sendChat(){(async()=>{
   try{
-    const activeModel=(quiz[idx]&&quiz[idx].difficulty==='初級')?'flash':gemModel;
+    const activeModel=(quiz[idx]&&quiz[idx].difficulty==='初級')?'flashlite':gemModel;
     const input=document.getElementById('chatInput');
     if(!input||!input.value.trim()||chatLoading||chatTurns>=chatMaxTurns)return;
     const userMsg=input.value.trim();
@@ -422,7 +423,7 @@ ${isLastTurn?'- 【重要】これが最後のターンです。新しい質問�
     chatHist.forEach(m=>{messages.push({role:m.role==='user'?'user':'model',parts:[{text:m.content}]});});
     const controller=new AbortController();
     const tid=setTimeout(()=>controller.abort(),30000);
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_INFO[activeModel||gemModel].api}:generateContent?key=${gemKey}`,{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_INFO[activeModel||gemModel].api}:generateContent?key=${getApiKey(activeModel||gemModel)}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:messages,generationConfig:{maxOutputTokens:16000,temperature:0.7}}),
       signal:controller.signal
@@ -629,7 +630,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v59').then(cache=>{
+      caches.open('stgym-v61').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -802,7 +803,7 @@ async function generateQuestion(){
         await new Promise(r=>setTimeout(r,5000));
       }
       try{
-        var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[document.getElementById('cqModelVal')?.value||'pro31']||MODEL_INFO.pro31).api+':generateContent?key='+gemKey,{
+        var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[document.getElementById('cqModelVal')?.value||'pro31']||MODEL_INFO.pro31).api+':generateContent?key='+getApiKey('pro31'),{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.7}})
         });
@@ -954,7 +955,7 @@ async function runAiReview(){
     +'}';
   
   try{
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_INFO.pro31.api+':generateContent?key='+gemKey,{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL_INFO.pro31.api+':generateContent?key='+getApiKey('pro31'),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts:[{text:reviewPrompt}]}],generationConfig:{maxOutputTokens:2000,temperature:0.3}})
     });
@@ -1054,7 +1055,7 @@ async function runAdversarialReview(q){
     +'- 赤字企業の場合は資金制約、投資回収期間も考慮すること';
 
   try{
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+gemKey,{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+getApiKey('pro31'),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.3}})
     });
@@ -1118,7 +1119,7 @@ async function runAdversarialReview(){
     +'],"overallPass":true/false,"summary":"総合判定コメント"}';
 
   try{
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[modelKey]||MODEL_INFO.pro31).api+':generateContent?key='+gemKey,{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[modelKey]||MODEL_INFO.pro31).api+':generateContent?key='+getApiKey(modelKey||'pro31'),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4000,temperature:0.2}})
     });
@@ -1191,7 +1192,7 @@ async function fixQuestionFromReview(){
     +'元のJSONと同じ形式で出力してください。';
 
   try{
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[modelKey]||MODEL_INFO.pro31).api+':generateContent?key='+gemKey,{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(MODEL_INFO[modelKey]||MODEL_INFO.pro31).api+':generateContent?key='+getApiKey(modelKey||'pro31'),{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.5}})
     });
@@ -1332,7 +1333,7 @@ ${chatLog}`;
   try{
     const controller=new AbortController();
     const tid=setTimeout(()=>controller.abort(),20000);
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_INFO[activeModel].api}:generateContent?key=${gemKey}`,{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_INFO[activeModel].api}:generateContent?key=${getApiKey(activeModel||gemModel)}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:500,temperature:0.3}}),
       signal:controller.signal
