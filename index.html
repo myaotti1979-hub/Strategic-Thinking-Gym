@@ -151,7 +151,7 @@ let answerHistory={};
 try{answerHistory=JSON.parse(localStorage.getItem('answer_history')||'{}');}catch(e){}
 function saveAnswer(id,correct){answerHistory[id]=correct?'correct':'wrong';try{localStorage.setItem('answer_history',JSON.stringify(answerHistory));}catch(e){}}
 let _clearing=false;async function clearHistory(){_clearing=true;answerHistory={};try{localStorage.removeItem('answer_history');}catch(e){}if(typeof syncUrl!=='undefined'&&syncUrl&&typeof syncId!=='undefined'&&syncId){try{const url=syncUrl.replace(/\/$/,'')+'/'+encodeURIComponent(syncId)+'.json';await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h:{},t:Date.now()})});}catch(e){}}render();setTimeout(()=>{_clearing=false;},3000);}
-let gemKey='';
+let gemKey='';let gemKeyFree='';
 let gemModel='flash';
 let chatMaxTurns=3;
 let sessionCost=0;
@@ -167,7 +167,7 @@ const MODEL_INFO={
 function estTurnCost(m){const i=MODEL_INFO[m];const inT=1800,outT=1500,thT=outT*i.thinkMult;return((inT*i.inCost+(outT+thT)*i.outCost)/1000000*152).toFixed(1);}
 function estCostFromChars(inChars,outChars,m){const i=MODEL_INFO[m];const inT=Math.ceil(inChars/1.5),outT=Math.ceil(outChars/1.5),thT=outT*i.thinkMult;return(inT*i.inCost+(outT+thT)*i.outCost)/1000000*152;}
 function addCost(c){sessionCost+=c;monthlyCost+=c;try{localStorage.setItem('monthly_cost_'+new Date().toISOString().slice(0,7),monthlyCost.toFixed(2));}catch(e){}}
-try{gemKey=localStorage.getItem('gemini_key')||'';}catch(e){}
+try{gemKey=localStorage.getItem('gemini_key')||'';gemKeyFree=localStorage.getItem('gemini_key_free')||'';}catch(e){}
 let chatHist=[],chatLoading=false,chatTurns=0;
 
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
