@@ -1,4 +1,4 @@
-# 更新履歴 — 事業戦略ケース Practice
+# 更新履歴 — Strategic Thinking Gym
 
 ## v63（2026-05-09）🔧 バグ修正＋新機能7件
 
