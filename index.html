@@ -104,17 +104,25 @@ body.light-mode #splash .tagline{color:#6b6860}
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v64</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#5a5850;font-size:9px;margin-top:2px">stgym-v65</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
 <script>
+// === Security: HTML escape helper ===
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// === Constants ===
+const JPY_RATE = 152; // 円/ドル概算レート（設定画面で変更可能にする予定）
+const DAILY_GOAL_DEFAULT = 5; // デフォルト日次目標
+
 // CASES is loaded via <script src="cases.js" defer>
 // Wait for it to be available before rendering
 let GEMINI_CASES = [];
 function waitForCases(){
   if(typeof CASES!=='undefined'&&Array.isArray(CASES)&&CASES.length>0){
     console.log('✓ '+CASES.length+'問読み込み完了');
+    buildCompIds();
     try{var gq=JSON.parse(localStorage.getItem('gemini_questions')||'[]');if(gq.length>0){GEMINI_CASES=gq;}}catch(e){}
     render();
   }else{
@@ -135,39 +143,79 @@ function waitForCases(){
 const FW_MKT=['PESTLE分析','5フォース分析','SWOT分析','クロスSWOT分析','アンゾフの成長マトリクス','STP分析','4P/4C分析'];
 const FW_GRW=['グロースモデル選択','KPI設計','実行戦略パターン'];
 const FW=[...FW_MKT,...FW_GRW];
-const COMP_IDS={
-  '🟢 ベルソワン社':[52,119,213,309,413,509,609],
-  '🟢 クラウドネクスト社':[53,120,214,333,571],
-  '🟢 清流ビバレッジ社':[54,121,215,310,610],
-  '🟢 テクノス社':[56,123,217,345,417],
-  '🟢 サクラ建設社':[60,127,221,415,510,672],
-  '🟢 ミナト銀行':[61,128,311,414,574],
-  '🟢 スマートフリート社':[66,130,337,432,578],
-  '🟡 ネオバンク社':[69,133,228,318,433,579,673,945],
-  '🟡 スカイドローン社':[70,134,229,424,584,618],
-  '🟡 クラフトサケ社':[72,136,231,435,583],
-  '🟡 エドテックラボ社':[73,137,225,434,580],
-  '🟡 フードロスゼロ社':[74,138,232,325,449,525,674],
-  '🟡 ペットテック社':[75,139,233,338,568,677,847],
-  '🟡 スマートタウン社':[76,140,234,339,593,688],
-  '🔴 ニューロサイエンス社':[78,142,236,320,590],
-  '🔴 バイオフォージ社':[79,143,237,321,529,655,731,935],
-  '🔴 デジタルRx社':[80,144,238,322,455,530,626],
-  '🔴 オービタルクリーン社':[81,145,239,323,428,526,625,724,830,931],
-  '🔴 クオンタムシールド社':[82,146,240,324,527,653],
-  '🔴 シリコンアーキテクト社':[83,147,241,326,454,531,628,727,836,937],
-  '🔴 クライマテック社':[84,148,242,329,427,532,627,728,831,936],
-  '🔴 メタファクトリー社':[85,149,243,330,456,533,629,729,837,934],
-  '🔴 サイバーフィジカル農業社':[86,150,244,331,457,534,630,733,868,938]
+
+// COMP_IDS: auto-generated from CASES after load
+let COMP_IDS={};
+function buildCompIds(){
+  // Group by company name, find companies with 5+ questions
+  const groups={};
+  CASES.forEach(c=>{
+    // Extract company name (e.g. "ベルソワン社" from industry)
+    const m=c.industry.match(/^(.+?社|.+?銀行)/);
+    if(!m)return;
+    const name=m[1];
+    if(!groups[name])groups[name]={ids:[],diffs:{}};
+    groups[name].ids.push(c.id);
+    groups[name].diffs[c.difficulty]=(groups[name].diffs[c.difficulty]||0)+1;
+  });
+  COMP_IDS={};
+  Object.entries(groups).forEach(([name,data])=>{
+    if(data.ids.length<5)return;
+    // Determine primary difficulty by majority
+    const d=data.diffs;
+    const primary=(d['上級']||0)>=(d['中級']||0)&&(d['上級']||0)>=(d['初級']||0)?'上級':
+                  (d['中級']||0)>=(d['初級']||0)?'中級':'初級';
+    const emoji=primary==='上級'?'🔴':primary==='中級'?'🟡':'🟢';
+    COMP_IDS[emoji+' '+name]=data.ids.sort((a,b)=>a-b);
+  });
 }
+
 let aFw='all',mode='individual',compTarget=null,total=5,quiz=[],idx=0,sel=null,rev=false,results={},screen='start';
 let questionSource='claude';
 let onlyUnanswered=false;
 window.aDiff='all';
 let answerHistory={};
 try{answerHistory=JSON.parse(localStorage.getItem('answer_history')||'{}');}catch(e){}
-function saveAnswer(id,correct){answerHistory[id]=correct?'correct':'wrong';try{localStorage.setItem('answer_history',JSON.stringify(answerHistory));}catch(e){}answerDates[id]=Date.now();try{localStorage.setItem('answer_dates',JSON.stringify(answerDates));}catch(e){}}
-let _clearing=false;async function clearHistory(){_clearing=true;answerHistory={};try{localStorage.removeItem('answer_history');}catch(e){}if(typeof syncUrl!=='undefined'&&syncUrl&&typeof syncId!=='undefined'&&syncId){try{const url=syncUrl.replace(/\/$/,'')+'/'+encodeURIComponent(syncId)+'.json';await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h:{},t:Date.now()})});}catch(e){}}render();setTimeout(()=>{_clearing=false;},3000);}
+
+// === Answer date tracking ===
+let answerDates={};
+try{answerDates=JSON.parse(localStorage.getItem('answer_dates')||'{}');}catch(e){}
+
+function saveAnswer(id,correct){
+  answerHistory[id]=correct?'correct':'wrong';
+  try{localStorage.setItem('answer_history',JSON.stringify(answerHistory));}catch(e){}
+  answerDates[id]=Date.now();
+  try{localStorage.setItem('answer_dates',JSON.stringify(answerDates));}catch(e){}
+  updateSRS(id,correct);
+}
+
+// === Learning goal ===
+let dailyGoal=DAILY_GOAL_DEFAULT;
+try{dailyGoal=parseInt(localStorage.getItem('daily_goal'))||DAILY_GOAL_DEFAULT;}catch(e){}
+
+// === Spaced Repetition data ===
+// srsData[id] = { nextReview: timestamp, interval: days, easeFactor: 2.5 }
+let srsData={};
+try{srsData=JSON.parse(localStorage.getItem('srs_data')||'{}');}catch(e){}
+function updateSRS(id,correct){
+  const d=srsData[id]||{interval:1,easeFactor:2.5};
+  if(correct){
+    d.interval=Math.round(d.interval*d.easeFactor);
+    d.easeFactor=Math.min(3.0,d.easeFactor+0.1);
+  }else{
+    d.interval=1;
+    d.easeFactor=Math.max(1.3,d.easeFactor-0.2);
+  }
+  d.nextReview=Date.now()+d.interval*86400000;
+  srsData[id]=d;
+  try{localStorage.setItem('srs_data',JSON.stringify(srsData));}catch(e){}
+}
+
+// === Search state ===
+let searchQuery='';
+let searchResults=[];
+
+let _clearing=false;async function clearHistory(){_clearing=true;answerHistory={};answerDates={};srsData={};try{localStorage.removeItem('answer_history');localStorage.removeItem('answer_dates');localStorage.removeItem('srs_data');}catch(e){}if(typeof syncUrl!=='undefined'&&syncUrl&&typeof syncId!=='undefined'&&syncId){try{const url=syncUrl.replace(/\/$/,'')+'/'+encodeURIComponent(syncId)+'.json';await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h:{},t:Date.now()})});}catch(e){}}render();setTimeout(()=>{_clearing=false;},3000);}
 let gemKey='';let gemKeyFree='';
 let gemModel='flash';
 let chatMaxTurns=3;
@@ -181,17 +229,16 @@ const MODEL_INFO={
   pro25:{name:'2.5 Pro',icon:'💎',api:'gemini-2.5-pro',inCost:1.25,outCost:10.00,thinkMult:2.5,desc:'バランス型'},
   pro31:{name:'3.1 Pro',icon:'◆',api:'gemini-3.1-pro-preview',inCost:2.00,outCost:12.00,thinkMult:3,desc:'最高品質'}
 };
-function estTurnCost(m){const i=MODEL_INFO[m];const inT=1800,outT=1500,thT=outT*i.thinkMult;return((inT*i.inCost+(outT+thT)*i.outCost)/1000000*152).toFixed(1);}
-function estCostFromChars(inChars,outChars,m){const i=MODEL_INFO[m];const inT=Math.ceil(inChars/1.5),outT=Math.ceil(outChars/1.5),thT=outT*i.thinkMult;return(inT*i.inCost+(outT+thT)*i.outCost)/1000000*152;}
+function estTurnCost(m){const i=MODEL_INFO[m];const inT=1800,outT=1500,thT=outT*i.thinkMult;return((inT*i.inCost+(outT+thT)*i.outCost)/1000000*JPY_RATE).toFixed(1);}
+function estCostFromChars(inChars,outChars,m){const i=MODEL_INFO[m];const inT=Math.ceil(inChars/1.5),outT=Math.ceil(outChars/1.5),thT=outT*i.thinkMult;return(inT*i.inCost+(outT+thT)*i.outCost)/1000000*JPY_RATE;}
 function addCost(c){sessionCost+=c;monthlyCost+=c;try{localStorage.setItem('monthly_cost_'+new Date().toISOString().slice(0,7),monthlyCost.toFixed(2));}catch(e){}}
 try{gemKey=localStorage.getItem('gemini_key')||'';gemKeyFree=localStorage.getItem('gemini_key_free')||'';}catch(e){}
 function getApiKey(model){if(model==='flash'||model==='flashlite')return gemKeyFree||gemKey;return gemKey;}
 let chatHist=[],chatLoading=false,chatTurns=0;
 let onlyWrong=false;
+let onlySrsDue=false;
 let bookmarks={};
 try{bookmarks=JSON.parse(localStorage.getItem('bookmarks')||'{}');}catch(e){}
-let answerDates={};
-try{answerDates=JSON.parse(localStorage.getItem('answer_dates')||'{}');}catch(e){}
 let darkMode=false;
 try{darkMode=localStorage.getItem('dark_mode')==='false'?false:true;}catch(e){darkMode=true;}
 
@@ -205,16 +252,41 @@ function pool(){
   if(onlyUnanswered) p=p.filter(c=>!answerHistory[c.id]);
   if(onlyWrong) p=p.filter(c=>answerHistory[c.id]==='wrong');
   if(window.onlyBookmarked) p=p.filter(c=>bookmarks[c.id]);
+  if(onlySrsDue) p=p.filter(c=>{const s=srsData[c.id];return s&&s.nextReview&&s.nextReview<=Date.now();});
   return p;
 }
 function start(){
   const p=pool();
   if(mode==='comp'){quiz=[...p].sort((a,b)=>a.id-b.id);total=quiz.length;}
   else{total=Math.min(parseInt(document.getElementById('qnum')?.value||10),p.length);quiz=shuffle(p).slice(0,total);}
-  idx=0;sel=null;rev=false;results={};chatHist=[];chatTurns=0;screen='quiz';render();
+  idx=0;sel=null;rev=false;results={};chatHist=[];chatTurns=0;screen='quiz';
+  // Try to restore sparring draft for first question
+  if(quiz.length>0)tryRestoreSparring(quiz[0].id);
+  render();
 }
-function goHome(){screen='start';chatHist=[];chatTurns=0;render();window.scrollTo({top:0});}
-function render(){document.getElementById('app').innerHTML=screen==='start'?rS():screen==='dashboard'?rDashboard():screen==='data_manage'?rDataManage():screen==='create_q'?rCreateQ():screen==='individual_setup'?rIndividualSetup():screen==='comp_setup'?rCompSetup():screen==='quiz'?rQ():screen==='settings'?rSet():screen==='sparring_history'?rSparringHistory():screen==='sparring_view'?rSparringView():screen==='calendar'?rCalendar():rSc();bindAll();}
+function goHome(){
+  // Save sparring state if mid-conversation
+  if(screen==='quiz'&&chatHist.length>0&&chatTurns<chatMaxTurns){
+    try{
+      const c=quiz[idx];
+      localStorage.setItem('sparring_draft',JSON.stringify({caseId:c.id,chatHist,chatTurns,savedAt:Date.now()}));
+    }catch(e){}
+  }
+  screen='start';chatHist=[];chatTurns=0;render();window.scrollTo({top:0});
+}
+// Restore sparring draft if available for current question
+function tryRestoreSparring(caseId){
+  try{
+    const draft=JSON.parse(localStorage.getItem('sparring_draft')||'null');
+    if(draft&&draft.caseId===caseId&&(Date.now()-draft.savedAt)<86400000){
+      chatHist=draft.chatHist;chatTurns=draft.chatTurns;
+      localStorage.removeItem('sparring_draft');
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function render(){document.getElementById('app').innerHTML=screen==='start'?rS():screen==='dashboard'?rDashboard():screen==='data_manage'?rDataManage():screen==='create_q'?rCreateQ():screen==='individual_setup'?rIndividualSetup():screen==='comp_setup'?rCompSetup():screen==='quiz'?rQ():screen==='settings'?rSet():screen==='sparring_history'?rSparringHistory():screen==='sparring_view'?rSparringView():screen==='calendar'?rCalendar():screen==='search'?rSearch():rSc();bindAll();}
 
 function rBackBtn(label){return `<button onclick="goHome()" style="background:none;border:none;color:#6b6860;font-size:13px;cursor:pointer;padding:4px 0;font-family:inherit;display:flex;align-items:center;gap:4px"><span style="font-size:16px">←</span>${label||'ホームに戻る'}</button>`;}
 
@@ -225,13 +297,32 @@ function rS(){
   const answered=Object.keys(answerHistory).length;
   const correct=Object.values(answerHistory).filter(v=>v==='correct').length;
   const rate=answered>0?Math.round(correct/answered*100):0;
+
+  // Today's progress toward daily goal
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayCount=Object.values(answerDates).filter(ts=>ts>=today.getTime()).length;
+  const goalPct=Math.min(100,Math.round(todayCount/dailyGoal*100));
+
+  // SRS due count
+  const now2=Date.now();
+  const srsDueCount=Object.entries(srsData).filter(([id,d])=>d.nextReview&&d.nextReview<=now2).length;
+
   return`<div class="ctn fade-in">
   <div style="text-align:center;padding-top:36px;margin-bottom:28px">
     <div style="margin-bottom:12px"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v64</div>
+    <div style="color:#8a8780;font-size:9px;margin-top:2px">stgym-v65</div>
+  </div>
+
+  <!-- Daily goal progress bar -->
+  <div style="margin-bottom:16px;padding:10px 14px;background:#141413;border:1px solid #2a2a28;border-radius:10px;display:flex;align-items:center;gap:12px">
+    <div style="flex:1">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:#a09d93">今日の目標</span><span style="font-size:10px;color:${todayCount>=dailyGoal?'#6ec992':'#d4a853'};font-weight:700">${todayCount}/${dailyGoal}問${todayCount>=dailyGoal?' ✓':''}</span></div>
+      <div style="background:#2a2a28;border-radius:4px;height:6px;width:100%"><div style="background:${todayCount>=dailyGoal?'#6ec992':'#d4a853'};width:${goalPct}%;height:100%;border-radius:4px;transition:width .3s"></div></div>
+    </div>
+    ${srsDueCount>0?'<button onclick="startSrsDue()" style="padding:6px 10px;background:#2a1a18;border:1px solid #3a2520;border-radius:6px;color:#e07a73;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🔄 復習 '+srsDueCount+'問</button>':''}
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;text-align:center">
@@ -280,7 +371,10 @@ function rS(){
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
       <button onclick="screen='calendar';render()" class="btn home-btn-sm"><span>📅</span><div>学習カレンダー</div></button>
-      <button onclick="toggleDarkMode()" class="btn home-btn-sm" id="themeToggle"><span>${darkMode?'☀️':'🌙'}</span><div>${darkMode?'ライトモード':'ダークモード'}</div></button>
+      <button onclick="screen='search';render()" class="btn home-btn-sm"><span>🔍</span><div>問題検索</div></button>
+    </div>
+    <div style="margin-top:8px">
+      <button onclick="toggleDarkMode()" class="btn home-btn-sm" style="width:100%" id="themeToggle"><span>${darkMode?'☀️':'🌙'}</span><div>${darkMode?'ライトモード':'ダークモード'}</div></button>
     </div>
   </div>
   ${Object.keys(answerHistory).length>0?'<div style="text-align:center;margin-top:12px"><button onclick="if(confirm(\'回答履歴をリセットしますか？\'))clearHistory()" style="background:none;border:none;color:#6b6860;font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline">履歴リセット</button></div>':''}
@@ -322,6 +416,7 @@ return`<div class="ctn fade-in">
     <button class="fb2 ${onlyUnanswered?'acg':''}" id="toggleUnanswered" style="font-size:12px">${onlyUnanswered?'✓ 未回答のみ':'未回答のみ'}</button>
     <button class="fb2 ${onlyWrong?'acg':''}" id="toggleWrong" style="font-size:12px">${onlyWrong?'✓ 間違えた問題':'❌ 間違えた問題'}</button>
     <button class="fb2 ${window.onlyBookmarked?'acg':''}" id="toggleBookmarked" style="font-size:12px">${window.onlyBookmarked?'✓ ブックマーク':'🔖 ブックマーク'}</button>
+    <button class="fb2 ${onlySrsDue?'acg':''}" id="toggleSrs" style="font-size:12px">${onlySrsDue?'✓ 復習期限':'🔄 復習期限'}</button>
     <span style="color:#6b6860;font-size:12px">回答済：${Object.keys(answerHistory).length}問</span>
     <span style="color:#c4554e;font-size:12px">❌ ${Object.values(answerHistory).filter(v=>v==='wrong').length}</span>
     <span style="color:#d4a853;font-size:12px">🔖 ${Object.keys(bookmarks).length}</span>
@@ -331,7 +426,7 @@ return`<div class="ctn fade-in">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><input type="range" id="qnum" min="5" max="${Math.min(dfp.length,30)}" value="${Math.min(10,dfp.length)}" style="flex:1;accent-color:#d4a853"><span id="qval" style="color:#e8e4d9;font-size:16px;font-weight:700;min-width:32px;text-align:center">${Math.min(10,dfp.length)}</span><span style="color:#6b6860;font-size:12px">/ ${dfp.length}問</span></div>
 
   <button class="btn ${dfp.length>=1?'bg':'bo'}" id="startBtn">スタート（${dfp.length}問中${Math.min(10,dfp.length)}問）</button>
-  ${questionSource==='gemini'&&GEMINI_CASES.length>0?'<div style="margin-top:20px;padding-top:16px;border-top:1px solid #2a2a28"><div style="font-size:12px;font-weight:700;color:#a09d93;margin-bottom:8px">Gemini問題一覧</div>'+GEMINI_CASES.map(function(q){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a18"><div style="flex:1"><div style="font-size:11px;color:#e8e4d9">'+q.industry+' / '+q.framework+' / '+q.difficulty+'</div><div style="font-size:10px;color:#6b6860;margin-top:2px">'+(q.question||'').substring(0,30)+'...</div></div><button onclick="deleteGeminiQuestion('+q.id+')" style="background:none;border:none;color:#c4554e;font-size:18px;cursor:pointer;padding:4px 8px">✕</button></div>';}).join('')+'</div>':''}
+  ${questionSource==='gemini'&&GEMINI_CASES.length>0?'<div style="margin-top:20px;padding-top:16px;border-top:1px solid #2a2a28"><div style="font-size:12px;font-weight:700;color:#a09d93;margin-bottom:8px">Gemini問題一覧</div>'+GEMINI_CASES.map(function(q){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a18"><div style="flex:1"><div style="font-size:11px;color:#e8e4d9">'+esc(q.industry)+' / '+esc(q.framework)+' / '+esc(q.difficulty)+'</div><div style="font-size:10px;color:#6b6860;margin-top:2px">'+esc((q.question||'').substring(0,30))+'...</div></div><button onclick="deleteGeminiQuestion('+q.id+')" style="background:none;border:none;color:#c4554e;font-size:18px;cursor:pointer;padding:4px 8px">✕</button></div>';}).join('')+'</div>':''}
   </div>`;
 }
 
@@ -341,7 +436,12 @@ function rCompSetup(){
   <div style="text-align:center;margin:12px 0 20px"><div style="font-size:18px;font-weight:800">📋 総合ケース</div><div style="color:#6b6860;font-size:12px;margin-top:4px">1企業×10FWの一貫シナリオ</div></div>
 
   <div style="color:#a09d93;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:8px">企業を選択</div>
-  <div class="ft">${Object.keys(COMP_IDS).map(k=>`<button class="fb2 ${compTarget===k?'ac':''}" data-c="${k}">${k}</button>`).join('')}</div>
+  <div class="ft">${Object.keys(COMP_IDS).map(k=>{
+    const ids=COMP_IDS[k];
+    const answered=ids.filter(id=>answerHistory[id]).length;
+    const done=answered===ids.length;
+    return`<button class="fb2 ${compTarget===k?'ac':''}" data-c="${k}" style="position:relative">${k}${done?' ✓':answered>0?' ('+answered+'/'+ids.length+')':''}</button>`;
+  }).join('')}</div>
   ${compTarget?`<div style="color:#6b6860;font-size:11px;margin:12px 0;line-height:1.5">PESTLE→5F→SWOT→CrossSWOT→アンゾフ→STP→4P/4C→グロースモデル→KPI→実行パターンの順に10問出題</div>`:'<div style="color:#4a4840;font-size:12px;margin:16px 0;text-align:center">上から企業を選んでください</div>'}
 
   <button class="btn ${compTarget?'bg':'bo'}" id="startBtn">${compTarget?compTarget+'を開始':'企業を選択'}</button>
@@ -351,13 +451,67 @@ function rD(){return Array.from({length:total}).map((_,i)=>{let c='dt';if(i===id
 function rQ(){
   const c=quiz[idx],isR=rev,ok=results[idx]==='correct',isComp=c.industry.includes('総合');
   let chatUI='';try{if(isR&&gemKey)chatUI=rChat(c,ok);}catch(e){console.log('壁打ち描画エラー:',e);}
+  const indName=esc(c.industry.replace(/（総合[①-⑮]）/,''));
+  const diffBg=c.difficulty==='上級'?'#3a1515':c.difficulty==='中級'?'#3a3515':'';
+  const diffColor=c.difficulty==='上級'?'#e07a73':c.difficulty==='中級'?'#d4c853':'';
+
+  // Options rendering
+  const optionsHtml=c.options.map(o=>{
+    let cl='ob';
+    if(isR){cl+=' rv';if(o.id===c.bestAnswer)cl+=' co';else if(o.id===sel)cl+=' wr';else cl+=' fd';}
+    else if(o.id===sel)cl+=' sl';
+    const l=isR&&o.id===c.bestAnswer?'✓':o.id.toUpperCase();
+    return`<button class="${cl}" data-id="${o.id}" onclick="if(!rev){sel='${o.id}';render();}"><span class="ol">${l}</span><div><div class="oti">${esc(o.label)}</div>${isR?'<div class="ode">→ '+esc(o.description)+'</div>':''}</div></button>`;
+  }).join('');
+
+  // Explanation block (only when reviewed)
+  let explHtml='';
+  if(isR){
+    const optSummary=c.options.map(o=>
+      '<span style="color:'+(o.id===c.bestAnswer?'#6ec992':'#6b6860')+';font-size:11px">'
+      +(o.id===c.bestAnswer?'✓':' ')+o.id.toUpperCase()+': '+esc(o.label.substring(0,25))+(o.label.length>25?'…':'')+'</span>'
+    ).join('<br>');
+
+    // FW cross-navigation: find same company in different FWs
+    let crossNavHtml='';
+    const companyMatch=c.industry.match(/^(.+?社|.+?銀行)/);
+    if(companyMatch){
+      const sameCompany=CASES.filter(q=>q.id!==c.id&&q.industry.includes(companyMatch[1])&&q.framework!==c.framework);
+      if(sameCompany.length>0){
+        crossNavHtml='<div style="margin-top:12px;padding:10px;background:#0f0f0e;border-radius:8px">'
+          +'<div style="font-size:10px;color:#6b6860;margin-bottom:6px">🔗 '+esc(companyMatch[1])+' の他のFW問題</div>'
+          +'<div style="display:flex;gap:4px;flex-wrap:wrap">'
+          +sameCompany.slice(0,5).map(q=>
+            '<button onclick="jumpToQuestion('+q.id+')" style="padding:3px 8px;background:#1a1a18;border:1px solid #2a2a28;border-radius:6px;color:#8b8880;font-size:10px;cursor:pointer;font-family:inherit">'
+            +esc(q.framework.replace('分析',''))+'</button>'
+          ).join('')
+          +'</div></div>';
+      }
+    }
+
+    explHtml=`<div class="ex fade-in">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="font-size:22px">${ok?'🎯':'📝'}</span><span style="font-size:18px;font-weight:800;color:${ok?'#6ec992':'#e0a853'}">${ok?'正解！':'不正解'}</span></div>
+      <div style="margin-bottom:20px"><div class="sl2">解説</div><p class="st2">${optSummary}<div style="margin-top:10px">${esc(c.explanation)}</div></p></div>
+      <div class="fb"><div class="sl2">フレームワーク</div><p class="st2">${esc(c.keyFramework)}</p></div>
+      <div style="text-align:right;margin-top:8px"><button onclick="toggleBookmark(${c.id})" style="background:none;border:1px solid ${bookmarks[c.id]?'#d4a853':'#2a2a28'};border-radius:8px;padding:6px 14px;color:${bookmarks[c.id]?'#d4a853':'#6b6860'};font-size:12px;cursor:pointer;font-family:inherit">${bookmarks[c.id]?'🔖 ブックマーク済':'🔖 ブックマーク'}</button></div>
+      <div class="eb"><div class="sl2">実例</div><p class="st2">${esc(c.realExample)}</p></div>
+      ${crossNavHtml}
+    </div>${chatUI}
+    <button class="btn bl" id="nxt">${idx+1>=total?'結果を見る':'次の問題へ →'}</button>`;
+  }
+
   return`<div class="ctn fade-in">
   <div style="margin-bottom:12px">${rBackBtn('やめる')}</div>
   <div class="hdr"><div><div class="hl">Strategic Thinking Gym</div><div class="ht">ケースで鍛える事業戦略フレームワーク</div></div><div><div style="color:#6b6860;font-size:11px;font-weight:600;margin-bottom:6px;text-align:right">Q${idx+1} / ${total}</div><div class="pg">${rD()}</div></div></div>
-  <div class="cc"><div class="tgs"><span class="tg ti">${c.industry.replace(/（総合[①-⑮]）/,'')}</span><span class="tg td" style="background:${c.difficulty==='上級'?'#3a1515':c.difficulty==='中級'?'#3a3515':''}; color:${c.difficulty==='上級'?'#e07a73':c.difficulty==='中級'?'#d4c853':''}">${c.difficulty}</span><span class="tg tf">${c.framework}</span>${isComp?'<span class="tg tc">総合</span>':''}</div>
-  <p class="sit">${c.situation}</p><div class="qa"><p class="qt">${c.question}</p><div class="os">${c.options.map(o=>{let cl='ob';if(isR){cl+=' rv';if(o.id===c.bestAnswer)cl+=' co';else if(o.id===sel)cl+=' wr';else cl+=' fd';}else if(o.id===sel)cl+=' sl';const l=isR&&o.id===c.bestAnswer?'✓':o.id.toUpperCase();return`<button class="${cl}" data-id="${o.id}" onclick="if(!rev){sel='${o.id}';render();}"><span class="ol">${l}</span><div><div class="oti">${o.label}</div>${isR?'<div class="ode">→ '+o.description+'</div>':''}</div></button>`;}).join('')}</div></div></div>
-  ${isR?`<div class="ex fade-in"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="font-size:22px">${ok?'🎯':'📝'}</span><span style="font-size:18px;font-weight:800;color:${ok?'#6ec992':'#e0a853'}">${ok?'正解！':'不正解'}</span></div><div style="margin-bottom:20px"><div class="sl2">解説</div><p class="st2">${c.options.map(o=>'<span style="color:'+(o.id===c.bestAnswer?'#6ec992':'#6b6860')+';font-size:11px">'+(o.id===c.bestAnswer?'✓':' ')+o.id.toUpperCase()+': '+o.label.substring(0,25)+(o.label.length>25?'…':'')+'</span>').join('<br>')}<div style="margin-top:10px">${c.explanation}</div></p></div><div class="fb"><div class="sl2">フレームワーク</div><p class="st2">${c.keyFramework}</p></div><div style="text-align:right;margin-top:8px"><button onclick="toggleBookmark(${c.id})" style="background:none;border:1px solid ${bookmarks[c.id]?'#d4a853':'#2a2a28'};border-radius:8px;padding:6px 14px;color:${bookmarks[c.id]?'#d4a853':'#6b6860'};font-size:12px;cursor:pointer;font-family:inherit">${bookmarks[c.id]?'🔖 ブックマーク済':'🔖 ブックマーク'}</button></div><div class="eb"><div class="sl2">実例</div><p class="st2">${c.realExample}</p></div></div>${chatUI}<button class="btn bl" id="nxt">${idx+1>=total?'結果を見る':'次の問題へ →'}</button>`
-  :`<button class="btn ${sel?'bg':'bo'}" id="sub" onclick="if(sel){var isOk=sel===quiz[idx].bestAnswer;results[idx]=isOk?'correct':'wrong';saveAnswer(quiz[idx].id,isOk);rev=true;chatHist=[];chatTurns=0;render();}">回答を確認する</button>`}</div>`;
+  <div class="cc"><div class="tgs"><span class="tg ti">${indName}</span><span class="tg td" style="background:${diffBg}; color:${diffColor}">${esc(c.difficulty)}</span><span class="tg tf">${esc(c.framework)}</span>${isComp?'<span class="tg tc">総合</span>':''}</div>
+  <p class="sit">${esc(c.situation)}</p><div class="qa"><p class="qt">${esc(c.question)}</p><div class="os">${optionsHtml}</div></div></div>
+  ${isR?explHtml:`<button class="btn ${sel?'bg':'bo'}" id="sub" onclick="if(sel){var isOk=sel===quiz[idx].bestAnswer;results[idx]=isOk?'correct':'wrong';saveAnswer(quiz[idx].id,isOk);rev=true;chatHist=[];chatTurns=0;render();}">回答を確認する</button>`}</div>`;
+}
+// Jump to a specific question (for FW cross-navigation)
+function jumpToQuestion(targetId){
+  const targetQ=CASES.find(c=>c.id===targetId);
+  if(!targetQ)return;
+  quiz=[targetQ];total=1;idx=0;sel=null;rev=false;results={};chatHist=[];chatTurns=0;screen='quiz';render();
 }
 function rChat(c,ok){
   if(chatHist.length===0){
@@ -412,18 +566,53 @@ function rSet(){
     </div>
   </div>
   ${gemKey?'<div style="text-align:center;margin-top:16px"><div style="color:#6ec992;font-size:13px">✓ APIキー設定済み</div></div>':''}
+  <div class="cc" style="margin-top:16px">
+    <div class="sl2">学習設定</div>
+    <div style="display:flex;align-items:center;gap:12px;margin:8px 0 12px">
+      <span style="font-size:12px;color:#a09d93">1日の目標問題数</span>
+      <input type="number" id="dailyGoalInput" value="${dailyGoal}" min="1" max="50" style="width:60px;background:#0f0f0e;border:1px solid #2a2a28;border-radius:6px;padding:8px;color:#e8e4d9;font-size:14px;font-family:inherit;text-align:center;outline:none">
+      <span style="font-size:11px;color:#6b6860">問/日</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <span style="font-size:12px;color:#a09d93">為替レート（¥/$）</span>
+      <span style="font-size:12px;color:#6b6860">${JPY_RATE}円 ※コード内定数</span>
+    </div>
+    <button onclick="const g=parseInt(document.getElementById('dailyGoalInput').value)||5;dailyGoal=Math.max(1,Math.min(50,g));try{localStorage.setItem('daily_goal',String(dailyGoal));}catch(e){}alert('✓ 保存しました');render();" class="btn" style="background:#2a2a28;color:#e8e4d9;padding:10px;font-size:13px">学習設定を保存</button>
+  </div>
   </div>`;
 }
 
 function rSc(){
   const cor=Object.values(results).filter(r=>r==='correct').length,pct=Math.round(cor/total*100);
   let g;if(pct>=80)g={l:'ストラテジスト',c:'#d4a853',e:'👑'};else if(pct>=60)g={l:'マネージャー',c:'#6ec992',e:'🎖️'};else if(pct>=40)g={l:'リーダー',c:'#7aabdb',e:'⭐'};else g={l:'インターン',c:'#e07a73',e:'📚'};
-  return`<div class="sb fade-in"><div style="font-size:56px;margin-bottom:12px">${g.e}</div><div style="color:${g.c};font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">Your Grade</div><div style="font-size:36px;font-weight:900;margin-bottom:8px">${g.l}</div><div style="color:#6b6860;font-size:15px;margin-bottom:32px">${cor}/${total} 正解（${pct}%）</div>
-  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px;margin-bottom:32px">${quiz.map((c,i)=>{const o=results[i]==='correct';return`<div class="si ${o?'sc':'sw'}"><span style="font-size:16px;font-weight:800;width:24px;color:${o?'#6ec992':'#e07a73'}">${o?'✓':'✗'}</span><div style="flex:1;text-align:left"><div style="color:#c0bdb4;font-size:13px;font-weight:600">Q${i+1}. ${c.industry.replace(/（総合[①-⑮]）/,'')}</div><div style="color:#6b6860;font-size:11px">${c.framework}</div></div></div>`;}).join('')}</div>
+
+  // Review mode: tap to expand explanation
+  const reviewItems=quiz.map((c,i)=>{
+    const o=results[i]==='correct';
+    const expanded=window._expandedResult===i;
+    let detail='';
+    if(expanded){
+      detail=`<div style="padding:10px 12px;margin-top:8px;background:#0f0f0e;border-radius:8px;font-size:11px;line-height:1.7">
+        <div style="color:#a09d93;margin-bottom:6px"><b>状況:</b> ${esc(c.situation.substring(0,120))}...</div>
+        <div style="color:#a09d93;margin-bottom:6px"><b>問い:</b> ${esc(c.question)}</div>
+        <div style="margin-bottom:6px">${c.options.map(op=>'<div style="color:'+(op.id===c.bestAnswer?'#6ec992':'#6b6860')+'">'+(op.id===c.bestAnswer?'✓ ':' ')+op.id.toUpperCase()+': '+esc(op.label)+'</div>').join('')}</div>
+        <div style="color:#c0bdb4;padding:8px;background:#141413;border-radius:6px">${esc(c.explanation)}</div>
+      </div>`;
+    }
+    return`<div class="si ${o?'sc':'sw'}" style="cursor:pointer" onclick="window._expandedResult=window._expandedResult===${i}?-1:${i};render()">
+      <span style="font-size:16px;font-weight:800;width:24px;color:${o?'#6ec992':'#e07a73'}">${o?'✓':'✗'}</span>
+      <div style="flex:1;text-align:left"><div style="color:#c0bdb4;font-size:13px;font-weight:600">Q${i+1}. ${esc(c.industry.replace(/（総合[①-⑮]）/,''))}</div><div style="color:#6b6860;font-size:11px">${esc(c.framework)}</div>${detail}</div>
+      <span style="color:#4a4840;font-size:14px">${expanded?'▲':'▼'}</span>
+    </div>`;
+  }).join('');
+
+  return`<div class="sb fade-in"><div style="font-size:56px;margin-bottom:12px">${g.e}</div><div style="color:${g.c};font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">Your Grade</div><div style="font-size:36px;font-weight:900;margin-bottom:8px">${g.l}</div><div style="color:#6b6860;font-size:15px;margin-bottom:16px">${cor}/${total} 正解（${pct}%）</div>
+  <div style="color:#4a4840;font-size:11px;margin-bottom:16px">👆 タップで解説を表示</div>
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px;margin-bottom:32px">${reviewItems}</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><button class="btn bg" id="retry" style="width:auto;padding:14px 36px">もう一度挑戦する</button><button class="btn" id="goHomeBtn" style="width:auto;padding:14px 36px;background:#2a2a28;color:#a09d93">ホームに戻る</button></div></div>`;
 }
 
-async function sendChat(){(async()=>{
+async function sendChat(){
   try{
     const activeModel=(quiz[idx]&&quiz[idx].difficulty==='初級')?'flashlite':gemModel;
     const input=document.getElementById('chatInput');
@@ -484,7 +673,7 @@ ${isLastTurn?'- 【重要】これが最後のターンです。新しい質問�
     render();
     setTimeout(()=>{const ci=document.getElementById('chatInput');if(ci)ci.focus();},100);
   }
-})();}
+}
 
 
 function rDashboard(){
@@ -607,7 +796,42 @@ function rDashboard(){
       <div style="font-size:12px;font-weight:700;color:#a09d93;margin-bottom:8px">フレームワーク別</div>
       ${fwRows}
     </div>
-    ${GEMINI_CASES.length>0?'<div style="margin-top:16px;padding:16px;background:#0f0f0e;border-radius:12px"><div style="font-size:12px;font-weight:700;color:#6ec992;margin-bottom:8px">🤖 Gemini問題 ('+GEMINI_CASES.length+'問)</div>'+function(){var gs={};GEMINI_CASES.forEach(function(q){var k=q.framework||'不明';if(!gs[k])gs[k]={t:0,a:0,c:0};gs[k].t++;if(answerHistory[q.id]){gs[k].a++;if(answerHistory[q.id]==='correct')gs[k].c++;}});return Object.entries(gs).map(function(e){var rate=e[1].a>0?Math.round(e[1].c/e[1].a*100):null;return '<div style="display:grid;grid-template-columns:90px 1fr 45px;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a18"><div style="font-size:11px;color:#a09d93">'+e[0].replace('分析','').substring(0,10)+'</div><div style="background:#1a1a18;border-radius:4px;height:8px"><div style="background:'+(rate>=70?'#4a9e6e':rate>=40?'#d4a853':'#c4554e')+';width:'+(rate||0)+'%;height:100%;border-radius:4px"></div></div><div style="font-size:11px;font-weight:700;color:'+(rate!==null?(rate>=70?'#4a9e6e':rate>=40?'#d4a853':'#c4554e'):'#4a4840')+';text-align:right">'+(rate!==null?rate+'%':'-')+'</div></div>';}).join('');}()+'</div>':''}
+    ${GEMINI_CASES.length>0?'<div style="margin-top:16px;padding:16px;background:#0f0f0e;border-radius:12px"><div style="font-size:12px;font-weight:700;color:#6ec992;margin-bottom:8px">🤖 Gemini問題 ('+GEMINI_CASES.length+'問)</div>'+function(){var gs={};GEMINI_CASES.forEach(function(q){var k=q.framework||'不明';if(!gs[k])gs[k]={t:0,a:0,c:0};gs[k].t++;if(answerHistory[q.id]){gs[k].a++;if(answerHistory[q.id]==='correct')gs[k].c++;}});return Object.entries(gs).map(function(e){var rate=e[1].a>0?Math.round(e[1].c/e[1].a*100):null;return '<div style="display:grid;grid-template-columns:90px 1fr 45px;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a18"><div style="font-size:11px;color:#a09d93">'+esc(e[0]).replace('分析','').substring(0,10)+'</div><div style="background:#1a1a18;border-radius:4px;height:8px"><div style="background:'+(rate>=70?'#4a9e6e':rate>=40?'#d4a853':'#c4554e')+';width:'+(rate||0)+'%;height:100%;border-radius:4px"></div></div><div style="font-size:11px;font-weight:700;color:'+(rate!==null?(rate>=70?'#4a9e6e':rate>=40?'#d4a853':'#c4554e'):'#4a4840')+';text-align:right">'+(rate!==null?rate+'%':'-')+'</div></div>';}).join('');}()+'</div>':''}
+    ${function(){
+      // Weakness detection + practice button (A3)
+      const w=getWeakestFW();
+      if(!w)return'';
+      return '<div style="margin-top:16px;padding:16px;background:#1a1810;border:1px solid #3a3520;border-radius:12px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<div><div style="font-size:12px;font-weight:700;color:#d4a853;margin-bottom:4px">🎯 弱点FW: '+esc(w.fw)+'</div>'
+        +'<div style="font-size:11px;color:#8b8880">正答率 '+w.rate+'%（'+w.answered+'問回答 / '+w.wrong+'問不正解）</div></div>'
+        +'<button onclick="startWeakFwPractice()" style="padding:8px 14px;background:#d4a853;color:#0a0a0a;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">鍛える →</button>'
+        +'</div></div>';
+    }()}
+    ${function(){
+      // Time series graph (B4)
+      const weeks=getWeeklyStats(8);
+      if(weeks.every(w=>w.total===0))return'';
+      const maxTotal=Math.max(...weeks.map(w=>w.total),1);
+      const w2=260,h2=120,pad=30;
+      const barW=(w2-pad*2)/weeks.length*0.7;
+      const gap=(w2-pad*2)/weeks.length;
+      let bars='';
+      weeks.forEach((wk,i)=>{
+        const x=pad+i*gap+gap*0.15;
+        const barH=wk.total>0?(wk.total/maxTotal)*(h2-pad-10):0;
+        const rateH=wk.rate!==null?(wk.correct/maxTotal)*(h2-pad-10):0;
+        bars+=`<rect x="${x}" y="${h2-pad-barH}" width="${barW}" height="${barH}" fill="#2a2a28" rx="2"/>`;
+        if(rateH>0)bars+=`<rect x="${x}" y="${h2-pad-rateH}" width="${barW}" height="${rateH}" fill="${wk.rate>=70?'#4a9e6e':wk.rate>=40?'#d4a853':'#c4554e'}" rx="2"/>`;
+        bars+=`<text x="${x+barW/2}" y="${h2-8}" text-anchor="middle" fill="#6b6860" font-size="8">${wk.label}</text>`;
+        if(wk.rate!==null)bars+=`<text x="${x+barW/2}" y="${h2-pad-barH-4}" text-anchor="middle" fill="#a09d93" font-size="7">${wk.rate}%</text>`;
+      });
+      return '<div style="margin-top:16px;padding:16px;background:#0f0f0e;border-radius:12px">'
+        +'<div style="font-size:12px;font-weight:700;color:#a09d93;margin-bottom:8px">📈 週別正答率推移</div>'
+        +'<svg viewBox="0 0 '+w2+' '+h2+'" style="width:100%">'+bars+'</svg>'
+        +'<div style="display:flex;gap:8px;justify-content:center;font-size:9px;color:#6b6860;margin-top:4px"><span>■ 回答数</span><span style="color:#4a9e6e">■ 正解数</span></div>'
+        +'</div>';
+    }()}
   </div>`;
 }
 
@@ -668,7 +892,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v64').then(cache=>{
+      caches.open('stgym-v65').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -927,12 +1151,12 @@ async function generateQuestion(){
     
     var previewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#4a9e6e;margin-bottom:10px">✓ 問題プレビュー</div>'
-      +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+q.industry+' / '+q.framework+' / '+q.difficulty+'</div>'
-      +'<div style="font-size:13px;color:#e8e4d9;margin-bottom:10px;line-height:1.6">'+q.situation+'</div>'
-      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">'+q.question+'</div>'
+      +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+esc(q.industry)+' / '+esc(q.framework)+' / '+esc(q.difficulty)+'</div>'
+      +'<div style="font-size:13px;color:#e8e4d9;margin-bottom:10px;line-height:1.6">'+esc(q.situation)+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">'+esc(q.question)+'</div>'
       +q.options.map(function(o){return'<div style="padding:8px 10px;margin:4px 0;border-radius:6px;font-size:12px;'+(o.id===q.bestAnswer?'background:#1a2a1a;border:1px solid #4a9e6e;color:#4a9e6e':'background:#1a1a18;color:#a09d93')+'">'
-        +o.id.toUpperCase()+': '+o.label+(o.id===q.bestAnswer?' ✓':'')+'</div>';}).join('')
-      +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5">'+(q.explanation||'').substring(0,200)+'...</div></div>';
+        +o.id.toUpperCase()+': '+esc(o.label)+(o.id===q.bestAnswer?' ✓':'')+'</div>';}).join('')
+      +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5">'+esc((q.explanation||'').substring(0,200))+'...</div></div>';
     
     var adversarialHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">⚔️ 反論テスト</div>'
@@ -1221,12 +1445,12 @@ async function fixQuestionFromReview(){
     
     var previewHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#5ba0d0;margin-bottom:10px">🔧 修正後プレビュー</div>'
-      +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+fixed.industry+' / '+fixed.framework+' / '+fixed.difficulty+'</div>'
-      +'<div style="font-size:13px;color:#e8e4d9;margin-bottom:10px;line-height:1.6">'+fixed.situation+'</div>'
-      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">'+fixed.question+'</div>'
+      +'<div style="font-size:11px;color:#6b6860;margin-bottom:4px">'+esc(fixed.industry)+' / '+esc(fixed.framework)+' / '+esc(fixed.difficulty)+'</div>'
+      +'<div style="font-size:13px;color:#e8e4d9;margin-bottom:10px;line-height:1.6">'+esc(fixed.situation)+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">'+esc(fixed.question)+'</div>'
       +fixed.options.map(function(o){return'<div style="padding:8px 10px;margin:4px 0;border-radius:6px;font-size:12px;'+(o.id===fixed.bestAnswer?'background:#1a2a1a;border:1px solid #4a9e6e;color:#4a9e6e':'background:#1a1a18;color:#a09d93')+'">'
-        +o.id.toUpperCase()+': '+o.label+(o.id===fixed.bestAnswer?' ✓':'')+'</div>';}).join('')
-      +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5">'+(fixed.explanation||'')+'</div></div>';
+        +o.id.toUpperCase()+': '+esc(o.label)+(o.id===fixed.bestAnswer?' ✓':'')+'</div>';}).join('')
+      +'<div style="margin-top:8px;font-size:11px;color:#6b6860;line-height:1.5">'+esc(fixed.explanation||'')+'</div></div>';
     
     var adversarialHtml='<div style="background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:700;color:#e8e4d9;margin-bottom:8px">⚔️ 反論テスト</div>'
@@ -1256,7 +1480,8 @@ function bindAll(){
   document.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{window.aDiff=b.dataset.diff;render();});
   const tu=document.getElementById('toggleUnanswered');if(tu)tu.onclick=()=>{onlyUnanswered=!onlyUnanswered;if(onlyUnanswered){onlyWrong=false;window.onlyBookmarked=false;}render();};
   const tw=document.getElementById('toggleWrong');if(tw)tw.onclick=()=>{onlyWrong=!onlyWrong;if(onlyWrong){onlyUnanswered=false;window.onlyBookmarked=false;}render();};
-  const tb=document.getElementById('toggleBookmarked');if(tb)tb.onclick=()=>{window.onlyBookmarked=!window.onlyBookmarked;if(window.onlyBookmarked){onlyUnanswered=false;onlyWrong=false;}render();};
+  const tb=document.getElementById('toggleBookmarked');if(tb)tb.onclick=()=>{window.onlyBookmarked=!window.onlyBookmarked;if(window.onlyBookmarked){onlyUnanswered=false;onlyWrong=false;onlySrsDue=false;}render();};
+  const ts=document.getElementById('toggleSrs');if(ts)ts.onclick=()=>{onlySrsDue=!onlySrsDue;if(onlySrsDue){onlyUnanswered=false;onlyWrong=false;window.onlyBookmarked=false;}render();};
   const st=document.getElementById('startBtn');if(st)st.onclick=()=>{const p=pool();if((mode==='individual'&&p.length>=1)||(mode==='comp'&&compTarget))start();};
   if(screen==='quiz'&&!rev){document.querySelectorAll('.ob').forEach(b=>b.onclick=()=>{sel=b.dataset.id;render();});const s=document.getElementById('sub');if(s)s.onclick=()=>{if(!sel)return;const isOk=sel===quiz[idx].bestAnswer;results[idx]=isOk?'correct':'wrong';saveAnswer(quiz[idx].id,isOk);rev=true;chatHist=[];chatTurns=0;render();};}
   const s3t=document.getElementById('sel3t');if(s3t)s3t.onclick=()=>{chatMaxTurns=3;render();};
@@ -1267,6 +1492,128 @@ function bindAll(){
   const hb=document.getElementById('goHomeBtn');if(hb)hb.onclick=goHome;
   document.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>{gemModel=b.dataset.model;try{localStorage.setItem('gemini_model',gemModel);}catch(e){}render();});
   const sk=document.getElementById('saveKey');if(sk)sk.onclick=()=>{const v=document.getElementById('gemKeyInput').value.trim();const vf=(document.getElementById('gemKeyFreeInput')||{}).value?.trim()||'';gemKey=v;gemKeyFree=vf;try{localStorage.setItem('gemini_key',v);localStorage.setItem('gemini_key_free',vf);}catch(e){}screen='start';render();};
+}
+
+// === SRS: Start review of due questions from home ===
+function startSrsDue(){
+  const now2=Date.now();
+  const dueIds=Object.entries(srsData).filter(([id,d])=>d.nextReview&&d.nextReview<=now2).map(([id])=>parseInt(id));
+  const dueQs=CASES.filter(c=>dueIds.includes(c.id));
+  if(dueQs.length===0){alert('復習期限の問題はありません');return;}
+  mode='individual';questionSource='claude';
+  quiz=shuffle(dueQs).slice(0,Math.min(20,dueQs.length));
+  total=quiz.length;idx=0;sel=null;rev=false;results={};chatHist=[];chatTurns=0;screen='quiz';render();
+}
+
+// === Search Screen (B1) ===
+function rSearch(){
+  const q=searchQuery.toLowerCase();
+  let resultsHtml='';
+  if(q.length>=2){
+    searchResults=CASES.filter(c=>
+      c.industry.toLowerCase().includes(q)||c.situation.toLowerCase().includes(q)||
+      c.question.toLowerCase().includes(q)||c.framework.toLowerCase().includes(q)
+    ).slice(0,30);
+    resultsHtml=searchResults.length===0
+      ?'<div style="text-align:center;color:#6b6860;padding:20px">該当する問題が見つかりません</div>'
+      :searchResults.map(c=>{
+        const answered=answerHistory[c.id];
+        const icon=answered==='correct'?'✓':answered==='wrong'?'✗':'';
+        const iconColor=answered==='correct'?'#6ec992':answered==='wrong'?'#c4554e':'#4a4840';
+        return`<div style="padding:10px 12px;background:#141413;border:1px solid #2a2a28;border-radius:10px;margin-bottom:8px;cursor:pointer" onclick="jumpToQuestion(${c.id})">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:#d4a853;font-weight:700">${esc(c.framework)}</span>
+            <span style="font-size:10px;color:${iconColor};font-weight:800">${icon} ID:${c.id}</span>
+          </div>
+          <div style="font-size:13px;color:#e8e4d9;font-weight:600;margin:4px 0">${esc(c.industry)}</div>
+          <div style="font-size:11px;color:#8b8880;line-height:1.4">${esc(c.question.substring(0,60))}${c.question.length>60?'...':''}</div>
+        </div>`;
+      }).join('');
+  }else if(q.length>0){
+    resultsHtml='<div style="text-align:center;color:#6b6860;padding:20px;font-size:12px">2文字以上入力してください</div>';
+  }
+  return`<div class="ctn fade-in">
+    ${rBackBtn()}
+    <div style="text-align:center;margin-bottom:16px"><div style="font-size:16px;font-weight:800">🔍 問題検索</div></div>
+    <input type="text" id="searchInput" value="${esc(searchQuery)}" placeholder="業種名・キーワードで検索..." style="width:100%;padding:12px 14px;background:#141413;border:1px solid #2a2a28;border-radius:10px;color:#e8e4d9;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:12px" oninput="searchQuery=this.value;render()">
+    <div style="color:#6b6860;font-size:11px;margin-bottom:8px">${searchResults.length>0?searchResults.length+'件ヒット':''}</div>
+    ${resultsHtml}
+  </div>`;
+}
+
+// === Comp progress tracker (B2) ===
+function getCompProgress(){
+  const progress={};
+  Object.entries(COMP_IDS).forEach(([name,ids])=>{
+    const answered=ids.filter(id=>answerHistory[id]).length;
+    const correct=ids.filter(id=>answerHistory[id]==='correct').length;
+    progress[name]={total:ids.length,answered,correct,done:answered===ids.length};
+  });
+  return progress;
+}
+
+// === Weakest FW detection (A3) ===
+function getWeakestFW(){
+  const fws=['PESTLE分析','5フォース分析','SWOT分析','クロスSWOT分析','アンゾフの成長マトリクス','STP分析','4P/4C分析','グロースモデル選択','KPI設計','実行戦略パターン'];
+  let weakest=null,worstRate=100;
+  fws.forEach(fw=>{
+    const qs=CASES.filter(c=>c.framework===fw);
+    const answered=qs.filter(c=>answerHistory[c.id]);
+    if(answered.length<5)return;
+    const correct=qs.filter(c=>answerHistory[c.id]==='correct');
+    const rate=Math.round(correct.length/answered.length*100);
+    if(rate<worstRate){worstRate=rate;weakest={fw,rate,answered:answered.length,wrong:answered.length-correct.length};}
+  });
+  return weakest;
+}
+function startWeakFwPractice(){
+  const w=getWeakestFW();
+  if(!w)return;
+  mode='individual';questionSource='claude';aFw=w.fw;onlyWrong=true;
+  const p=pool();
+  if(p.length===0){onlyWrong=false;}
+  quiz=shuffle(pool()).slice(0,Math.min(10,pool().length));
+  total=quiz.length;idx=0;sel=null;rev=false;results={};chatHist=[];chatTurns=0;screen='quiz';
+  aFw='all';onlyWrong=false;
+  render();
+}
+
+// === Time series graph data (B4) ===
+function getWeeklyStats(weeks){
+  const result=[];
+  const now=new Date();
+  for(let w=weeks-1;w>=0;w--){
+    const weekStart=new Date(now);weekStart.setDate(weekStart.getDate()-w*7);weekStart.setHours(0,0,0,0);
+    const weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
+    let total=0,correct=0;
+    Object.entries(answerDates).forEach(([id,ts])=>{
+      if(ts>=weekStart.getTime()&&ts<weekEnd.getTime()){total++;if(answerHistory[id]==='correct')correct++;}
+    });
+    result.push({label:(weekStart.getMonth()+1)+'/'+weekStart.getDate(),total,correct,rate:total>0?Math.round(correct/total*100):null});
+  }
+  return result;
+}
+
+// === Sparring text export (B5) ===
+function exportSparringText(sessionId){
+  const sessions=getSparringSessions();
+  const s=sessions.find(x=>x.id===sessionId);
+  if(!s)return;
+  let text='=== 壁打ち履歴 ===\n';
+  text+=s.industry+' / '+s.framework+' / '+s.difficulty+'\n';
+  text+=s.question+'\n\n';
+  s.history.forEach(m=>{
+    text+=(m.role==='user'?'【あなた】':'【AI】')+'\n'+m.content+'\n\n';
+  });
+  if(s.reviewCard){
+    text+='=== レビュー ===\n';
+    text+='要約: '+s.reviewCard.summary+'\n';
+    text+='強み: '+s.reviewCard.strength+'\n';
+    text+='改善点: '+s.reviewCard.improvement+'\n';
+  }
+  navigator.clipboard.writeText(text).then(()=>{
+    alert('壁打ちログをコピーしました');
+  }).catch(()=>{prompt('コピーしてください：',text);});
 }
 
 // === 壁打ちセッション保存 ===
@@ -1390,14 +1737,14 @@ function rSparringHistory(){
       const rc=s.reviewCard;
       html2+='<div style="background:#141413;border:1px solid #2a2a28;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="viewSparringSession('+s.id+')">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-        +'<span style="color:#d4a853;font-size:11px;font-weight:700">'+s.framework+'</span>'
+        +'<span style="color:#d4a853;font-size:11px;font-weight:700">'+esc(s.framework)+'</span>'
         +'<span style="color:#4a4840;font-size:10px">'+dateStr+'</span></div>'
-        +'<div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#e8e4d9">'+s.industry+'</div>'
-        +(rc?'<div style="font-size:12px;color:#a09d93;margin-bottom:6px;line-height:1.4">📌 '+rc.summary+'</div>'
+        +'<div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#e8e4d9">'+esc(s.industry)+'</div>'
+        +(rc?'<div style="font-size:12px;color:#a09d93;margin-bottom:6px;line-height:1.4">📌 '+esc(rc.summary)+'</div>'
         +'<div style="display:flex;gap:8px;margin-bottom:4px">'
-        +'<div style="flex:1;font-size:10px;color:#6ec992;line-height:1.3">💪 '+rc.strength+'</div>'
-        +'<div style="flex:1;font-size:10px;color:#d4a853;line-height:1.3">🔧 '+rc.improvement+'</div></div>'
-        :'<div style="color:#8b8880;font-size:11px;line-height:1.4">'+s.situation+'</div>')
+        +'<div style="flex:1;font-size:10px;color:#6ec992;line-height:1.3">💪 '+esc(rc.strength)+'</div>'
+        +'<div style="flex:1;font-size:10px;color:#d4a853;line-height:1.3">🔧 '+esc(rc.improvement)+'</div></div>'
+        :'<div style="color:#8b8880;font-size:11px;line-height:1.4">'+esc(s.situation)+'</div>')
         +'<div style="color:#6b6860;font-size:10px;margin-top:6px">'+s.turns+'ターン / '+(s.model||'flash')+'</div>'
         +'</div>';
     });
@@ -1410,18 +1757,18 @@ function rSparringView(){
   if(!s)return rSparringHistory();
   let html2='<div style="display:flex;justify-content:space-between;align-items:center">'
     +rBackBtn('履歴に戻る').replace("goHome()","screen='sparring_history';render()")
-    +'<button onclick="deleteSparringSession('+s.id+')" style="background:none;border:none;color:#6b6860;font-size:11px;cursor:pointer;font-family:inherit">🗑 削除</button></div>';
+    +'<div style="display:flex;gap:6px"><button onclick="exportSparringText('+s.id+')" style="background:none;border:1px solid #2a2a28;border-radius:6px;color:#8b8880;font-size:11px;cursor:pointer;font-family:inherit;padding:4px 8px">📋 コピー</button><button onclick="deleteSparringSession('+s.id+')" style="background:none;border:none;color:#6b6860;font-size:11px;cursor:pointer;font-family:inherit">🗑 削除</button></div></div>';
   const rc=s.reviewCard;
   html2+='<div style="margin:16px 0;padding:14px;background:#141413;border:1px solid #2a2a28;border-radius:12px">'
-    +'<div style="color:#d4a853;font-size:11px;font-weight:700;margin-bottom:4px">'+s.framework+' / '+s.difficulty+'</div>'
-    +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">'+s.industry+'</div>'
-    +'<div style="color:#8b8880;font-size:12px;line-height:1.5">'+s.question+'</div></div>';
+    +'<div style="color:#d4a853;font-size:11px;font-weight:700;margin-bottom:4px">'+esc(s.framework)+' / '+esc(s.difficulty)+'</div>'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">'+esc(s.industry)+'</div>'
+    +'<div style="color:#8b8880;font-size:12px;line-height:1.5">'+esc(s.question)+'</div></div>';
   if(rc){
     html2+='<div style="padding:12px;background:#0f1714;border:1px solid #1a3526;border-radius:10px;margin-bottom:16px">'
-      +'<div style="font-size:12px;color:#e8e4d9;margin-bottom:8px;line-height:1.4">📌 '+rc.summary+'</div>'
+      +'<div style="font-size:12px;color:#e8e4d9;margin-bottom:8px;line-height:1.4">📌 '+esc(rc.summary)+'</div>'
       +'<div style="display:flex;gap:10px">'
-      +'<div style="flex:1;padding:8px;background:#141413;border-radius:8px"><div style="font-size:9px;color:#6ec992;font-weight:700;margin-bottom:3px">💪 強み</div><div style="font-size:11px;color:#a09d93;line-height:1.4">'+rc.strength+'</div></div>'
-      +'<div style="flex:1;padding:8px;background:#141413;border-radius:8px"><div style="font-size:9px;color:#d4a853;font-weight:700;margin-bottom:3px">🔧 改善点</div><div style="font-size:11px;color:#a09d93;line-height:1.4">'+rc.improvement+'</div></div>'
+      +'<div style="flex:1;padding:8px;background:#141413;border-radius:8px"><div style="font-size:9px;color:#6ec992;font-weight:700;margin-bottom:3px">💪 強み</div><div style="font-size:11px;color:#a09d93;line-height:1.4">'+esc(rc.strength)+'</div></div>'
+      +'<div style="flex:1;padding:8px;background:#141413;border-radius:8px"><div style="font-size:9px;color:#d4a853;font-weight:700;margin-bottom:3px">🔧 改善点</div><div style="font-size:11px;color:#a09d93;line-height:1.4">'+esc(rc.improvement)+'</div></div>'
       +'</div></div>';
   }
   s.history.forEach(m=>{
@@ -1553,7 +1900,15 @@ async function pushToCloud(){
     m:gemModel,
     k:gemKey,
     c:{},
-    t:Date.now()
+    t:Date.now(),
+    // Expanded sync data
+    ad:answerDates,
+    bk:bookmarks,
+    gq:GEMINI_CASES,
+    sp:getSparringSessions(),
+    sr:srsData,
+    dm:darkMode,
+    dg:dailyGoal
   };
   for(let i=0;i<12;i++){const d=new Date();d.setMonth(d.getMonth()-i);const key='monthly_cost_'+d.toISOString().slice(0,7);try{const v=localStorage.getItem(key);if(v)data.c[key]=v;}catch(e){}}
   try{
@@ -1574,21 +1929,39 @@ async function pullFromCloud(){
     if(!res.ok){syncStatus='error';updateSyncBadge();return;}
     const data=await res.json();
     if(!data||!data.h){syncStatus='synced';updateSyncBadge();return;}
-    // Smart merge: keep newer data (by timestamp)
-    const localKeys=Object.keys(answerHistory).length;
-    const remoteKeys=Object.keys(data.h).length;
-    // Merge: union of both (both are correct/wrong, no conflict)
     let changed=false;
     if(_clearing)return;
+    // Merge answer history
     Object.entries(data.h).forEach(([k,v])=>{
       if(!answerHistory[k]){answerHistory[k]=v;changed=true;}
     });
-    if(changed){
-      try{localStorage.setItem('answer_history',JSON.stringify(answerHistory));}catch(e){}
+    if(changed){try{localStorage.setItem('answer_history',JSON.stringify(answerHistory));}catch(e){}}
+    // Merge answer dates
+    if(data.ad){Object.entries(data.ad).forEach(([k,v])=>{if(!answerDates[k]){answerDates[k]=v;}});try{localStorage.setItem('answer_dates',JSON.stringify(answerDates));}catch(e){}}
+    // Merge bookmarks
+    if(data.bk){Object.entries(data.bk).forEach(([k,v])=>{if(!bookmarks[k])bookmarks[k]=v;});try{localStorage.setItem('bookmarks',JSON.stringify(bookmarks));}catch(e){}}
+    // Merge Gemini questions (by ID)
+    if(data.gq&&Array.isArray(data.gq)){
+      const existingIds=new Set(GEMINI_CASES.map(q=>q.id));
+      data.gq.forEach(q=>{if(!existingIds.has(q.id))GEMINI_CASES.push(q);});
+      try{localStorage.setItem('gemini_questions',JSON.stringify(GEMINI_CASES));}catch(e){}
     }
+    // Merge sparring sessions
+    if(data.sp&&Array.isArray(data.sp)){
+      let sessions=getSparringSessions();
+      const existingIds2=new Set(sessions.map(s=>s.id));
+      data.sp.forEach(s=>{if(!existingIds2.has(s.id))sessions.push(s);});
+      sessions.sort((a,b)=>b.id-a.id);
+      try{localStorage.setItem('sparring_sessions',JSON.stringify(sessions.slice(0,50)));}catch(e){}
+    }
+    // Merge SRS data
+    if(data.sr){Object.entries(data.sr).forEach(([k,v])=>{if(!srsData[k])srsData[k]=v;});try{localStorage.setItem('srs_data',JSON.stringify(srsData));}catch(e){}}
+    // Sync preferences
     if(data.k&&!gemKey){gemKey=data.k;try{localStorage.setItem('gemini_key',gemKey);}catch(e){}}
     if(data.m&&data.m!==gemModel){gemModel=data.m;try{localStorage.setItem('gemini_model',gemModel);}catch(e){}}
     if(data.c){Object.entries(data.c).forEach(([k,v])=>{try{localStorage.setItem(k,v);}catch(e){}});}
+    if(typeof data.dm==='boolean'){darkMode=data.dm;try{localStorage.setItem('dark_mode',data.dm?'true':'false');}catch(e){}}
+    if(data.dg){dailyGoal=data.dg;try{localStorage.setItem('daily_goal',String(data.dg));}catch(e){}}
     syncStatus='synced';lastSyncTime=Date.now();
     if(changed&&screen==='start')render();
   }catch(e){syncStatus='error';}
