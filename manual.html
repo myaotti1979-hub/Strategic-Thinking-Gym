@@ -3,214 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>使い方ガイド - Strategic Thinking Gym</title>
+<title>Strategic Thinking Gym — 操作マニュアル</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;color:#e8e4d9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.8;padding:20px;max-width:640px;margin:0 auto}
-h1{font-size:22px;text-align:center;margin-bottom:8px;color:#fff}
-h2{font-size:16px;color:#5ba0d0;margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid #2a2a28}
-h3{font-size:14px;color:#f0c040;margin:16px 0 8px}
-p{font-size:13px;color:#a09d93;margin-bottom:10px}
-.back{display:inline-block;color:#5ba0d0;text-decoration:none;font-size:13px;margin-bottom:20px}
-.card{background:#0f0f0e;border-radius:12px;padding:16px;margin-bottom:12px}
-.card-title{font-size:14px;font-weight:700;color:#e8e4d9;margin-bottom:6px}
-.step{display:flex;gap:12px;margin-bottom:10px}
-.step-num{background:#5ba0d0;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-.step-text{font-size:12px;color:#a09d93;line-height:1.6}
-.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px}
-.tag-green{background:#1a2a1a;color:#4a9e6e}
-.tag-yellow{background:#2a2510;color:#d4a853}
-.tag-red{background:#2a1a1a;color:#c4554e}
-.tag-blue{background:#1a1a2a;color:#5ba0d0}
-.sub{font-size:11px;color:#6b6860}
-table{width:100%;border-collapse:collapse;margin:8px 0}
-td,th{padding:6px 8px;font-size:11px;border-bottom:1px solid #1a1a18;text-align:left}
-th{color:#a09d93;font-weight:600}
-td{color:#6b6860}
+body{font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',sans-serif;background:#0e0e0c;color:#d4d0c8;line-height:1.8;padding:20px;max-width:720px;margin:0 auto}
+h1{font-size:22px;font-weight:900;color:#e8e4d9;margin-bottom:6px}
+h2{font-size:17px;font-weight:800;color:#d4a853;margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid #2a2a28}
+h3{font-size:14px;font-weight:700;color:#6ec992;margin:20px 0 8px}
+p{font-size:13px;color:#a09d93;margin-bottom:12px}
+.tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;margin-right:4px;font-weight:700}
+.tag-ver{background:#1a2a3a;color:#5b8fb9}
+.tag-new{background:#1a2a18;color:#6ec992}
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:12px}
+th{background:#1a1a18;color:#a09d93;text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid #2a2a28}
+td{padding:8px 10px;border-bottom:1px solid #1a1a18;color:#d4d0c8}
+tr:hover td{background:#1a1a18}
+.tip{background:#1a2a18;border-left:3px solid #6ec992;padding:10px 14px;margin:12px 0;border-radius:0 6px 6px 0;font-size:12px;color:#a0c8a8}
+.warn{background:#2a1a18;border-left:3px solid #e07a73;padding:10px 14px;margin:12px 0;border-radius:0 6px 6px 0;font-size:12px;color:#e0a8a0}
+code{background:#1a1a18;padding:2px 6px;border-radius:3px;font-size:12px;color:#d4a853;font-family:'SF Mono',Consolas,monospace}
+.back{display:inline-block;margin-bottom:16px;color:#5b8fb9;font-size:13px;text-decoration:none}
+.back:hover{text-decoration:underline}
+.emoji{font-size:16px;margin-right:4px}
+.section{background:#141412;border-radius:10px;padding:16px;margin:12px 0}
+.fw-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.fw-item{background:#1a1a18;padding:8px 10px;border-radius:6px;font-size:11px}
+.fw-label{color:#d4a853;font-weight:700}
+.fw-desc{color:#8a8780;margin-top:2px}
 </style>
 </head>
 <body>
-<a href="index.html" class="back">← アプリに戻る</a>
-<h1>📖 使い方ガイド</h1>
-<p style="text-align:center;color:#6b6860">Strategic Thinking Gym v65</p>
 
-<h2>🎯 このアプリについて</h2>
-<p>事業戦略の10フレームワークを、実際のケーススタディで鍛えるトレーニングアプリです。Claude AIが作成した1,000問に加え、Gemini AIで新しい問題を自動生成できます。</p>
+<a href="index.html" class="back">← アプリに戻る</a>
+
+<h1>📖 操作マニュアル</h1>
+<p><span class="tag tag-ver">stgym-v66</span> <span class="tag tag-new">1,000問収録</span></p>
+<p>Strategic Thinking Gym の使い方ガイドです。</p>
+
+<h2>🏠 ホーム画面</h2>
+<p>アプリ起動時のメイン画面です。以下の機能にアクセスできます。</p>
+
+<div class="section">
+<table>
+<tr><th>ボタン</th><th>機能</th></tr>
+<tr><td><span class="emoji">📝</span> 個別問題</td><td>FW・難易度を選んで出題</td></tr>
+<tr><td><span class="emoji">📋</span> 総合ケース</td><td>1企業×10問の一貫シナリオ</td></tr>
+<tr><td><span class="emoji">💬</span> 壁打ち履歴</td><td>AIとの過去の壁打ち対話を閲覧</td></tr>
+<tr><td><span class="emoji">⚙️</span> 設定</td><td>APIキー・同期・表示設定</td></tr>
+<tr><td><span class="emoji">📊</span> ダッシュボード</td><td>FW別の正答率・進捗一覧</td></tr>
+<tr><td><span class="emoji">📦</span> データ管理</td><td>回答履歴の書出し・読込み・同期</td></tr>
+<tr><td><span class="emoji">✏️</span> 問題作成</td><td>Gemini APIで新規問題を自動生成</td></tr>
+<tr><td><span class="emoji">📅</span> 学習カレンダー</td><td>日別の学習回数を可視化</td></tr>
+<tr><td><span class="emoji">🔍</span> 問題検索</td><td>キーワードで1,000問から検索</td></tr>
+</table>
+</div>
 
 <h2>📝 個別問題モード</h2>
-<div class="card">
-<div class="card-title">基本の使い方</div>
-<div class="step"><div class="step-num">1</div><div class="step-text">HOMEから「個別問題」をタップ</div></div>
-<div class="step"><div class="step-num">2</div><div class="step-text">Claude / Gemini タブを選択</div></div>
-<div class="step"><div class="step-num">3</div><div class="step-text">難易度・フレームワークを選択</div></div>
-<div class="step"><div class="step-num">4</div><div class="step-text">出題数を調整して「スタート」</div></div>
+
+<h3>出題設定</h3>
+<p>フレームワークと難易度を選択して出題します。</p>
+
+<div class="section">
+<p><strong>フレームワーク選択：</strong>「すべて」または10種のFWから1つを選択</p>
+<p><strong>難易度選択：</strong>「すべて」「初級」「中級」「上級」から選択</p>
+<p><strong>フィルタ：</strong>「未回答のみ」「誤答のみ」「復習期限」で絞込み可能</p>
 </div>
-<div class="card">
-<div class="card-title">難易度の目安</div>
-<table>
-<tr><th>難易度</th><th>特徴</th></tr>
-<tr><td><span class="tag tag-green">初級</span></td><td>正解が1つ明確。基礎知識の確認</td></tr>
-<tr><td><span class="tag tag-yellow">中級</span></td><td>2つで迷う。文脈による判断力</td></tr>
-<tr><td><span class="tag tag-red">上級</span></td><td>全選択肢がもっともらしい。データの罠を見抜く</td></tr>
-</table>
-</div>
+
+<div class="tip">💡 初めての方は「すべて・初級」から始めて、慣れたら中級→上級と進むのがおすすめです。</div>
+
+<h3>回答の流れ</h3>
+<p>① situationを読む → ② 4選択肢から最適な戦略を選ぶ → ③ 回答を送信 → ④ 解説を確認 → ⑤ AI壁打ち（任意）</p>
+
+<h3>AI壁打ち（Gemini連携）</h3>
+<p>回答後に「💬 壁打ちする」ボタンで、AIと対話形式で深掘りできます。「なぜこの選択肢が最適か」「他の選択肢ではなぜダメか」を議論し、理解を深められます。</p>
+
+<div class="warn">⚠️ AI壁打ちにはGemini APIキーが必要です。設定画面で入力してください。</div>
 
 <h2>📋 総合ケースモード</h2>
-<div class="card">
-<div class="card-title">1企業×10問の一貫シナリオ</div>
-<p>35社の中から企業を選び、PESTLE→5F→SWOT→…→実行戦略パターンの順に10問出題。1つの企業の戦略を一貫して追体験します。</p>
+<p>1つの架空企業に対して、10フレームワークを横断的に適用する一貫シナリオです。</p>
+
+<div class="section">
 <table>
-<tr><th>難易度</th><th>企業数</th></tr>
-<tr><td><span class="tag tag-green">初級</span></td><td>15社（150問）</td></tr>
-<tr><td><span class="tag tag-yellow">中級</span></td><td>10社（100問）</td></tr>
-<tr><td><span class="tag tag-red">上級</span></td><td>10社（100問）</td></tr>
+<tr><th>難易度</th><th>企業数</th><th>問題数</th></tr>
+<tr><td>初級</td><td>10社（B01-B10）</td><td>100問</td></tr>
+<tr><td>中級</td><td>10社（M01-M10）</td><td>100問</td></tr>
+<tr><td>上級</td><td>15社（A01-A15）</td><td>150問</td></tr>
 </table>
 </div>
 
-<h2>💬 壁打ちモード</h2>
-<div class="card">
-<div class="card-title">AIと戦略議論</div>
-<div class="step"><div class="step-num">1</div><div class="step-text">問題に回答後、解説画面で「壁打ちする」をタップ</div></div>
-<div class="step"><div class="step-num">2</div><div class="step-text">ターン数（3回 or 5回）を選択</div></div>
-<div class="step"><div class="step-num">3</div><div class="step-text">正解の戦略について疑問点や反論を入力</div></div>
-<p class="sub">※ Gemini APIキーが必要です（設定画面で入力）</p>
-<p class="sub">※ 503エラー時はターンを消費しません</p>
-</div>
-<div class="card">
-<div class="card-title">モデル選択</div>
-<table>
-<tr><th>モデル</th><th>特徴</th><th>コスト/ターン</th></tr>
-<tr><td>⚡ 2.5 Flash</td><td>コスパ重視</td><td>≈¥0.7</td></tr>
-<tr><td>💎 2.5 Pro</td><td>バランス型</td><td>≈¥8</td></tr>
-<tr><td>◆ 3.1 Pro</td><td>最高品質</td><td>≈¥12</td></tr>
-</table>
+<p>1社を選ぶと、PESTLE→5F→SWOT→CrossSWOT→アンゾフ→STP→4P/4C→グロース→KPI→実行の順で10問が出題されます。同一企業の状況を多角的に分析することで、フレームワーク間の関連を体感できます。</p>
+
+<h2>🔄 SRS（間隔反復）復習</h2>
+<p>間違えた問題は、間隔反復システム（SRS）で最適なタイミングに再出題されます。</p>
+
+<div class="section">
+<p>• 初回不正解 → 1日後に復習</p>
+<p>• 復習で正解 → 間隔が2倍に延長（1日→2日→4日→8日…）</p>
+<p>• 復習で不正解 → 間隔が1日にリセット</p>
 </div>
 
-<h2>✏️ 問題作成モード</h2>
-<div class="card">
-<div class="card-title">AIで新問題を自動生成</div>
-<div class="step"><div class="step-num">1</div><div class="step-text">HOMEから「問題作成」をタップ</div></div>
-<div class="step"><div class="step-num">2</div><div class="step-text">業種カテゴリ → 業種 → 企業規模 → 経営状況を選択</div></div>
-<div class="step"><div class="step-num">3</div><div class="step-text">フレームワーク・難易度・生成モデルを選択</div></div>
-<div class="step"><div class="step-num">4</div><div class="step-text">「問題を生成」→ 品質チェック → プレビュー</div></div>
-<div class="step"><div class="step-num">5</div><div class="step-text">「追加する」でGemini問題として保存</div></div>
-<p class="sub">※ 品質チェック（10項目）に不合格の場合は追加できません</p>
-<p class="sub">※ 追加した問題は個別問題のGeminiタブから出題・削除可能</p>
-</div>
+<p>ホーム画面に「🔄 復習 ○問」のバッジが表示されたら、復習のタイミングです。</p>
 
 <h2>📊 ダッシュボード</h2>
-<div class="card">
-<p>フレームワーク別の正答率をレーダーチャートで可視化。難易度別の正答率やFW別の進捗バーも表示されます。</p>
+<p>FW別の進捗を一覧で確認できます。</p>
+
+<div class="section">
+<p>• FW別の正答率（棒グラフ）</p>
+<p>• 回答済み / 全問数の進捗</p>
+<p>• 個別問題と総合ケースの内訳</p>
 </div>
+
+<h2>🎯 収録フレームワーク（10種・1,000問）</h2>
+
+<h3 style="color:#d4a853">■ マーケティング戦略（700問）</h3>
+<div class="fw-grid">
+<div class="fw-item"><div class="fw-label">1. PESTLE分析</div><div class="fw-desc">政治・経済・社会・技術・法律・環境の6軸</div></div>
+<div class="fw-item"><div class="fw-label">2. 5フォース分析</div><div class="fw-desc">業界の5つの競争要因</div></div>
+<div class="fw-item"><div class="fw-label">3. SWOT分析</div><div class="fw-desc">強み・弱み・機会・脅威</div></div>
+<div class="fw-item"><div class="fw-label">4. クロスSWOT</div><div class="fw-desc">SWOTの掛け合わせ戦略</div></div>
+<div class="fw-item"><div class="fw-label">5. アンゾフ</div><div class="fw-desc">市場×製品の成長4象限</div></div>
+<div class="fw-item"><div class="fw-label">6. STP</div><div class="fw-desc">セグメント・ターゲット・ポジション</div></div>
+<div class="fw-item"><div class="fw-label">7. 4P/4C分析</div><div class="fw-desc">製品・価格・流通・プロモーション</div></div>
+</div>
+
+<h3 style="color:#6ec992">■ グロース戦略（300問）</h3>
+<div class="fw-grid">
+<div class="fw-item"><div class="fw-label">8. グロースモデル</div><div class="fw-desc">PLG/SLG/MLG/CLGの選択</div></div>
+<div class="fw-item"><div class="fw-label">9. KPI設計</div><div class="fw-desc">先行・遅行・バランス指標</div></div>
+<div class="fw-item"><div class="fw-label">10. 実行戦略</div><div class="fw-desc">アジャイル/WF/標準化/カスタマイズ</div></div>
+</div>
+
+<h2>⚙️ 設定</h2>
+
+<h3>Gemini APIキー</h3>
+<p>Google AI StudioでAPIキーを取得し、設定画面に入力してください。AI壁打ちと問題作成に使用されます。</p>
+
+<h3>データ同期（Firebase）</h3>
+<p>Firebase Realtime DatabaseのURLと同期IDを設定すると、複数デバイス間で回答履歴を同期できます。</p>
+
+<h3>ダーク/ライトモード</h3>
+<p>ホーム画面下部の「🌙 ダークモード」ボタンで切替可能です。</p>
 
 <h2>📦 データ管理</h2>
-<div class="card">
-<div class="card-title">エクスポート / インポート</div>
-<p>問題データや回答履歴をJSONファイルとしてダウンロード・アップロードできます。デバイス間の移行にも使えます。</p>
-</div>
 
-<h2>⚙️ 初期設定</h2>
-<div class="card">
-<div class="card-title">Gemini APIキー</div>
-<div class="step"><div class="step-num">1</div><div class="step-text"><a href="https://aistudio.google.com/apikey" style="color:#5ba0d0">Google AI Studio</a> でAPIキーを作成</div></div>
-<div class="step"><div class="step-num">2</div><div class="step-text">アプリの「設定」→ APIキーを入力 →「保存する」</div></div>
-<p class="sub">無料枠: 3.1 Pro 100回/日、2.5 Pro 100回/日、2.5 Flash 250回/日</p>
-</div>
-<div class="card">
-<div class="card-title">Firebase同期（任意）</div>
-<div class="step"><div class="step-num">1</div><div class="step-text"><a href="https://console.firebase.google.com/" style="color:#5ba0d0">Firebase Console</a> でRealtime Databaseを作成</div></div>
-<div class="step"><div class="step-num">2</div><div class="step-text">アプリの「設定」→ URLと同期IDを入力</div></div>
-</div>
+<h3>エクスポート</h3>
+<p>回答履歴をJSON形式でダウンロードできます。バックアップに使用してください。</p>
+
+<h3>インポート</h3>
+<p>エクスポートしたJSONファイルを読み込み、回答履歴を復元できます。</p>
+
+<h3>履歴リセット</h3>
+<p>ホーム画面最下部の「履歴リセット」で全回答履歴を削除できます。</p>
+<div class="warn">⚠️ リセットは取り消せません。事前にエクスポートでバックアップを取ってください。</div>
+
+<h2>✏️ 問題作成（Gemini連携）</h2>
+<p>Gemini APIを使って新しいケーススタディ問題を自動生成できます。生成された問題は「Gemini問題」タブに追加されます。</p>
 
 <h2>📱 PWAインストール</h2>
-<div class="card">
-<table>
-<tr><th>OS</th><th>手順</th></tr>
-<tr><td>Android</td><td>Chrome → メニュー → 「アプリをインストール」</td></tr>
-<tr><td>iOS</td><td>Safari → 共有ボタン → 「ホーム画面に追加」</td></tr>
-<tr><td>PC</td><td>Chrome/Edge → アドレスバーのインストールアイコン</td></tr>
-</table>
+<p>ブラウザの「ホーム画面に追加」機能で、ネイティブアプリのように使えます。</p>
+<div class="section">
+<p><strong>iOS：</strong> Safari → 共有ボタン → 「ホーム画面に追加」</p>
+<p><strong>Android：</strong> Chrome → メニュー → 「ホーム画面に追加」</p>
 </div>
 
-<h2>🏗 フレームワーク体系</h2>
-<div class="card">
-<h3>■ マーケティングFW（7種）</h3>
-<p>PESTLE分析 → 5フォース分析 → SWOT分析 → クロスSWOT分析 → アンゾフの成長マトリクス → STP分析 → 4P/4C分析</p>
-<h3>■ グロースモデル（3種）</h3>
-<p>グロースモデル選択 → KPI設計 → 実行戦略パターン</p>
-<p class="sub">マーケティングFWで市場と自社を分析し、グロースモデルで成長戦略を設計・実行する流れを学びます。</p>
+<h2>❓ トラブルシューティング</h2>
+
+<h3>問題が表示されない</h3>
+<p><code>cases.js</code> が正しく読み込まれているか確認してください。ブラウザの開発者ツール（Console）でエラーを確認できます。</p>
+
+<h3>AI壁打ちが動かない</h3>
+<p>設定画面でGemini APIキーが正しく入力されているか確認してください。無料枠の制限に達している可能性もあります。</p>
+
+<h3>データが消えた</h3>
+<p>回答履歴はブラウザのlocalStorageに保存されています。ブラウザのデータを削除すると消えるため、定期的にエクスポートでバックアップを取ってください。</p>
+
+<div style="margin-top:40px;padding-top:16px;border-top:1px solid #2a2a28;text-align:center">
+<p style="color:#5a5850;font-size:11px">Strategic Thinking Gym v66 — 全1,000問収録</p>
+<a href="index.html" class="back" style="margin-top:8px">← アプリに戻る</a>
 </div>
 
-<div style="text-align:center;margin:30px 0;padding-top:20px;border-top:1px solid #2a2a28">
-
-<h2>📅 学習カレンダー</h2>
-<div class="card">
-<p>月別の学習履歴をカレンダー形式で可視化。日ごとの回答数と正答率を色分けで表示します。連続学習日数（ストリーク）も追跡。</p>
-<table>
-<tr><th>色</th><th>意味</th></tr>
-<tr><td><span class="tag tag-green">🟢</span></td><td>正答率70%以上</td></tr>
-<tr><td><span class="tag tag-yellow">🟡</span></td><td>正答率40-69%</td></tr>
-<tr><td><span class="tag tag-red">🔴</span></td><td>正答率39%以下</td></tr>
-</table>
-</div>
-
-<h2>🔖 ブックマーク</h2>
-<div class="card">
-<p>気になる問題を回答後にブックマーク。個別問題の出題時に「🔖 ブックマーク」フィルターで絞り込みできます。</p>
-</div>
-
-<h2>❌ 間違えた問題の再出題</h2>
-<div class="card">
-<p>個別問題の出題時に「❌ 間違えた問題」フィルターを選択すると、過去に不正解だった問題のみ出題されます。</p>
-</div>
-
-<h2>🌙 ダーク／ライトモード</h2>
-<div class="card">
-<p>HOME画面の「☀️ ライトモード」ボタンでテーマを切替。設定はデバイスに保存されます。</p>
-</div>
-
-<h2>🔄 間隔反復（SRS）</h2>
-<div class="card">
-<p>間違えた問題を最適なタイミングで自動復習。正解すると次の復習間隔が延び、不正解なら翌日に再出題されます。</p>
-<p>HOME画面の「🔄 復習 N問」ボタンから復習期限の問題をまとめて出題。個別問題の「🔄 復習期限」フィルターでも絞り込み可能です。</p>
-</div>
-
-<h2>🔍 問題検索</h2>
-<div class="card">
-<p>1000問を業種名・キーワードで横断検索。検索結果から問題にジャンプして解くことができます。</p>
-</div>
-
-<h2>🎯 弱点FW自動検出</h2>
-<div class="card">
-<p>ダッシュボードに最も正答率が低いフレームワークを表示。「鍛える→」ボタンで弱点FWの問題を即出題します。</p>
-</div>
-
-<h2>📈 週別正答率グラフ</h2>
-<div class="card">
-<p>ダッシュボードに過去8週間の正答率推移をグラフで表示。上達の実感が得られます。</p>
-</div>
-
-<h2>🎯 日次目標</h2>
-<div class="card">
-<p>HOME画面に「今日の目標」プログレスバーを表示。設定画面で1日の目標問題数を変更できます（デフォルト: 5問）。</p>
-</div>
-
-<h2>📋 壁打ちテキストコピー</h2>
-<div class="card">
-<p>壁打ち履歴の詳細画面で「📋 コピー」をタップすると、議論ログをテキスト形式でクリップボードにコピーできます。</p>
-</div>
-
-<h2>🔗 FWクロスナビゲーション</h2>
-<div class="card">
-<p>解説画面で同じ企業の他のフレームワーク問題へワンタップでジャンプ。1つの企業を多角的に分析できます。</p>
-</div>
-
-<h2>💬 壁打ち途中保存</h2>
-<div class="card">
-<p>壁打ち中に「やめる」で離脱しても、24時間以内なら同じ問題に戻ったときに会話が復元されます。</p>
-</div>
-<p class="sub">Strategic Thinking Gym v65</p>
-<a href="index.html" class="back">← アプリに戻る</a>
-</div>
 </body>
 </html>
