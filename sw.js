@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stgym-v71';
+const CACHE_NAME = 'stgym-v72';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys =>
