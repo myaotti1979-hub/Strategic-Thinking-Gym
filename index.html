@@ -104,7 +104,7 @@ body.light-mode #splash .tagline{color:#9a968e}
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#908d84;font-size:9px;margin-top:2px">stgym-v70</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#908d84;font-size:9px;margin-top:2px">stgym-v71</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -314,7 +314,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#a8a59c;font-size:9px;margin-top:2px">stgym-v70</div>
+    <div style="color:#a8a59c;font-size:9px;margin-top:2px">stgym-v71</div>
   </div>
 
   <!-- Daily goal progress bar -->
@@ -912,7 +912,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v70').then(cache=>{
+      caches.open('stgym-v71').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -1666,7 +1666,7 @@ async function generateReviewCard(sessionId){
   if(!gemKey)return;
   const sessions=getSparringSessions();
   const s=sessions.find(x=>x.id===sessionId);
-  if(!s||s.reviewCard)return;
+  if(!s||s.reviewCard&&s.reviewCard.strength!=='（解析中）')return;
   const activeModel=(s.difficulty==='初級')?'flash':(s.model||'flash');
   const chatLog=s.history.map(m=>(m.role==='user'?'ユーザー：':'AI：')+m.content).join('\n');
   const prompt=`以下の壁打ち（戦略議論）のログを分析し、必ず以下の4項目だけをJSON形式で返してください。他の文字は一切不要です。
@@ -1698,8 +1698,8 @@ ${chatLog}`;
           if(screen==='sparring_history'||screen==='sparring_view')render();
         }
       }catch(pe){
-        s.reviewCard={summary:text.substring(0,50),strength:'（解析中）',improvement:'（解析中）'};
-        try{localStorage.setItem('sparring_sessions',JSON.stringify(sessions));}catch(e){}
+        // Don't save failed card - leave reviewCard undefined so retry is possible
+        console.log('Review card parse failed, will retry later');
       }
     }
   }catch(e){console.log('Review card generation failed:',e);}
@@ -1765,7 +1765,8 @@ function rSparringHistory(){
         +'<div style="display:flex;gap:8px;margin-bottom:4px">'
         +'<div style="flex:1;font-size:10px;color:#6ec992;line-height:1.3">💪 '+esc(rc.strength)+'</div>'
         +'<div style="flex:1;font-size:10px;color:#d4a853;line-height:1.3">🔧 '+esc(rc.improvement)+'</div></div>'
-        :'<div style="color:#a8a49c;font-size:11px;line-height:1.4">'+esc(s.situation)+'</div>')
+        :'<div style="color:#a8a49c;font-size:11px;line-height:1.4">'+esc(s.situation)+'</div>'
+        +'<button onclick="event.stopPropagation();generateReviewCard('+s.id+');this.textContent=\'⏳ 解析中...\'" style="margin-top:6px;background:#1a2a18;border:1px solid #2a3a28;border-radius:6px;color:#6ec992;font-size:10px;padding:4px 10px;cursor:pointer;font-family:inherit">🔄 解析リトライ</button>')
         +'<div style="color:#9a968e;font-size:10px;margin-top:6px">'+s.turns+'ターン / '+(s.model||'flash')+'</div>'
         +'</div>';
     });
@@ -1791,6 +1792,10 @@ function rSparringView(){
       +'<div style="flex:1;padding:8px;background:#141413;border-radius:8px"><div style="font-size:9px;color:#6ec992;font-weight:700;margin-bottom:3px">💪 強み</div><div style="font-size:11px;color:#bab7ae;line-height:1.4">'+esc(rc.strength)+'</div></div>'
       +'<div style="flex:1;padding:8px;background:#141413;border-radius:8px"><div style="font-size:9px;color:#d4a853;font-weight:700;margin-bottom:3px">🔧 改善点</div><div style="font-size:11px;color:#bab7ae;line-height:1.4">'+esc(rc.improvement)+'</div></div>'
       +'</div></div>';
+  }else{
+    html2+='<div style="padding:12px;background:#1a1a18;border:1px solid #2a2a28;border-radius:10px;margin-bottom:16px;text-align:center">'
+      +'<div style="color:#a8a49c;font-size:12px;margin-bottom:8px">解析カードが未生成です</div>'
+      +'<button onclick="generateReviewCard('+s.id+');this.textContent=\'⏳ 解析中...\'" style="background:#1a2a18;border:1px solid #2a3a28;border-radius:8px;color:#6ec992;font-size:12px;padding:8px 20px;cursor:pointer;font-family:inherit">🔄 解析リトライ</button></div>';
   }
   s.history.forEach(m=>{
     const isUser=m.role==='user';
@@ -1810,7 +1815,7 @@ function rSparringView(){
 function rManual(){
 const s=`<div class="ctn fade-in">
 ${rBackBtn('ホームに戻る')}
-<div style="text-align:center;margin:8px 0 20px"><div style="font-size:18px;font-weight:800;color:#e8e4d9">📖 操作マニュアル</div><div style="color:#908d84;font-size:10px;margin-top:4px">stgym-v70 ・ 全1,000問収録</div></div>
+<div style="text-align:center;margin:8px 0 20px"><div style="font-size:18px;font-weight:800;color:#e8e4d9">📖 操作マニュアル</div><div style="color:#908d84;font-size:10px;margin-top:4px">stgym-v71 ・ 全1,000問収録</div></div>
 
 <div style="color:#d4a853;font-size:13px;font-weight:800;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #2a2a28">🏠 ホーム画面</div>
 <div style="font-size:12px;color:#bab7ae;line-height:1.9">
@@ -1895,7 +1900,7 @@ PESTLE→5F→SWOT→CrossSWOT→アンゾフ→STP→4P/4C→グロース→KPI
 <b style="color:#c8c4bc">データが消えた：</b>ブラウザデータ削除で消失。定期的にエクスポートを。
 </div>
 
-<div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #2a2a28;color:#908d84;font-size:10px">Strategic Thinking Gym v70 — 全1,000問収録</div>
+<div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #2a2a28;color:#908d84;font-size:10px">Strategic Thinking Gym v71 — 全1,000問収録</div>
 </div>`;
 return s;
 }
