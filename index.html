@@ -104,7 +104,7 @@ body.light-mode #splash .tagline{color:#9a968e}
 <div id="splash">
   <div class="logo" style="animation:none"><svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L40 14V30L22 42L4 30V14L22 2Z" stroke="#d4a853" stroke-width="1.5" fill="none"/><path d="M22 2L40 14L22 26L4 14L22 2Z" fill="#d4a853" opacity="0.15"/><path d="M22 14L34 21L22 28L10 21L22 14Z" fill="#d4a853" opacity="0.4"/><circle cx="22" cy="21" r="3" fill="#d4a853"/></svg></div>
   <div class="subtitle">Strategic Thinking Gym</div>
-  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#908d84;font-size:9px;margin-top:2px">stgym-v74</div>
+  <div class="tagline">ケースで鍛える事業戦略フレームワーク</div><div style="color:#908d84;font-size:9px;margin-top:2px">stgym-v75</div>
 </div>
 <div id="app"></div>
 <script src="cases.js" defer></script>
@@ -225,16 +225,14 @@ try{gemModel=localStorage.getItem('gemini_model')||'flash35';}catch(e){}
 try{monthlyCost=parseFloat(localStorage.getItem('monthly_cost_'+new Date().toISOString().slice(0,7))||'0');}catch(e){}
 const MODEL_INFO={
   flash35:{name:'3.5 Flash',icon:'🔥',api:'gemini-3.5-flash',inCost:0,outCost:0,thinkMult:0,desc:'推奨・無料枠'},
-  flash:{name:'2.5 Flash',icon:'⚡',api:'gemini-2.5-flash',inCost:0,outCost:0,thinkMult:0,desc:'旧世代Flash'},
   flashlite:{name:'3.1 Flash-Lite',icon:'⚡',api:'gemini-3.1-flash-lite',inCost:0,outCost:0,thinkMult:0,desc:'最速・最軽量'},
-  pro25:{name:'2.5 Pro',icon:'💎',api:'gemini-2.5-pro',inCost:1.25,outCost:10.00,thinkMult:2.5,desc:'有料・高品質'},
   pro31:{name:'3.1 Pro',icon:'◆',api:'gemini-3.1-pro-preview',inCost:2.00,outCost:12.00,thinkMult:3,desc:'有料・最高品質'}
 };
 function estTurnCost(m){const i=MODEL_INFO[m];const inT=1800,outT=1500,thT=outT*i.thinkMult;return((inT*i.inCost+(outT+thT)*i.outCost)/1000000*JPY_RATE).toFixed(1);}
 function estCostFromChars(inChars,outChars,m){const i=MODEL_INFO[m];const inT=Math.ceil(inChars/1.5),outT=Math.ceil(outChars/1.5),thT=outT*i.thinkMult;return(inT*i.inCost+(outT+thT)*i.outCost)/1000000*JPY_RATE;}
 function addCost(c){sessionCost+=c;monthlyCost+=c;try{localStorage.setItem('monthly_cost_'+new Date().toISOString().slice(0,7),monthlyCost.toFixed(2));}catch(e){}}
 try{gemKey=localStorage.getItem('gemini_key')||'';gemKeyFree=localStorage.getItem('gemini_key_free')||'';}catch(e){}
-function getApiKey(model){if(model==='flash35'||model==='flash'||model==='flashlite')return gemKeyFree||gemKey;return gemKey;}
+function getApiKey(model){if(model==='flash35'||model==='flashlite')return gemKeyFree||gemKey;return gemKey;}
 let chatHist=[],chatLoading=false,chatTurns=0;
 let onlyWrong=false;
 let onlySrsDue=false;
@@ -314,7 +312,7 @@ function rS(){
     <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:3px;margin-bottom:8px">Strategic Thinking Gym</div>
     <div style="color:#e0ddd4;font-size:13px;margin-bottom:6px">ケースで鍛える事業戦略フレームワーク</div>
     <div style="color:#ffffff;font-size:12px">全${CASES.length}問＋Gemini ${GEMINI_CASES.length}問</div>
-    <div style="color:#a8a59c;font-size:9px;margin-top:2px">stgym-v74</div>
+    <div style="color:#a8a59c;font-size:9px;margin-top:2px">stgym-v75</div>
   </div>
 
   <!-- Daily goal progress bar -->
@@ -912,7 +910,7 @@ function importCases(input){
       CASES=data;
       // Save to cache via fetch replacement
       const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-      caches.open('stgym-v74').then(cache=>{
+      caches.open('stgym-v75').then(cache=>{
         cache.put(new Request('./cases.json'),new Response(blob));
       });
       status.textContent='✓ '+data.length+'問をインポートしました';status.style.color='#4a9e6e';
@@ -1815,7 +1813,7 @@ function rSparringView(){
 function rManual(){
 const s=`<div class="ctn fade-in">
 ${rBackBtn('ホームに戻る')}
-<div style="text-align:center;margin:8px 0 20px"><div style="font-size:18px;font-weight:800;color:#e8e4d9">📖 操作マニュアル</div><div style="color:#908d84;font-size:10px;margin-top:4px">stgym-v74 ・ 全1,000問収録</div></div>
+<div style="text-align:center;margin:8px 0 20px"><div style="font-size:18px;font-weight:800;color:#e8e4d9">📖 操作マニュアル</div><div style="color:#908d84;font-size:10px;margin-top:4px">stgym-v75 ・ 全1,000問収録</div></div>
 
 <div style="color:#d4a853;font-size:13px;font-weight:800;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #2a2a28">🏠 ホーム画面</div>
 <div style="font-size:12px;color:#bab7ae;line-height:1.9">
@@ -1900,7 +1898,7 @@ PESTLE→5F→SWOT→CrossSWOT→アンゾフ→STP→4P/4C→グロース→KPI
 <b style="color:#c8c4bc">データが消えた：</b>ブラウザデータ削除で消失。定期的にエクスポートを。
 </div>
 
-<div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #2a2a28;color:#908d84;font-size:10px">Strategic Thinking Gym v74 — 全1,000問収録</div>
+<div style="text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #2a2a28;color:#908d84;font-size:10px">Strategic Thinking Gym v75 — 全1,000問収録</div>
 </div>`;
 return s;
 }
