@@ -75,8 +75,8 @@ sw.js               … サービスワーカー（PWA対応）
 manifest.json       … PWAマニフェスト
 icon-192.svg        … アプリアイコン（192px）
 icon-512.svg        … アプリアイコン（512px）
-manual.html         … 操作マニュアル
-handout_v63.md      … フレームワーク理論ハンドアウト
+validate_cases.js   … 問題データの品質検証スクリプト（node validate_cases.js cases.js）
+HANDOUT_v3.md       … 問題作成ルール＋フレームワーク理論
 CHANGELOG.md        … 更新履歴
 README.md           … このファイル
 ```
@@ -92,7 +92,7 @@ README.md           … このファイル
 
 1. 設定画面でGemini APIキーを入力
 2. 「AI壁打ち」と「問題作成」が有効化
-3. 対応モデル: Gemini 2.5 Pro / Flash / Flash Lite
+3. 対応モデル: Gemini 3.8 Flash（既定）/ 3.1 Flash-Lite / 3.1 Pro
 
 ## 技術仕様
 
@@ -104,7 +104,7 @@ README.md           … このファイル
 
 ## バージョン
 
-現在のバージョン: **stgym-v66**（2026年5月）
+現在のバージョン: **stgym-v77**（2026年10月）
 
 ---
 
